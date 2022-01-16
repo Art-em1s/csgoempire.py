@@ -124,6 +124,7 @@ class Gateway:
         self.events.trigger("on_deleted_item", data)
         
     def trade_status_handler(self, data):
+        # TODO: seperate all enuns out into their own unique events
         self.events.trigger("on_trade_status", data)
         
     
