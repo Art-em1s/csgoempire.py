@@ -124,8 +124,25 @@ class Gateway:
         self.events.trigger("on_deleted_item", data)
         
     def trade_status_handler(self, data):
-        # TODO: seperate all enuns out into their own unique events
+        trade_status_enum = {
+        -1: "error",
+        0: "pending",
+        1: "received",
+        2: "processing",
+        3: "sending",
+        4: "confirming",
+        5: "sent",
+        6: "completed",
+        7: "declined",
+        8: "canceled",
+        9: "timedout",
+        10: "credited"
+        }
+        #trigger on_trade_status event
         self.events.trigger("on_trade_status", data)
         
+        #trigger specific event based on trade status
+        trade_status = data['data']['status']
+        self.events.trigger(f"on_trade_{trade_status_enum[trade_status]}", data)
     
         
