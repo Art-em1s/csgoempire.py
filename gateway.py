@@ -6,10 +6,7 @@ from .metadata import Metadata
 from observable import Observable
 
 # TODO:
-# Handle reconnection logic
-# Cleanup print logging/remove
-# docstring connects, see https://discord.com/channels/@me/557952164627087360/926697708222283846 for example
-# improve event handling
+# docstring comments, see https://discord.com/channels/@me/557952164627087360/926697708222283846 for example
 
 
 class Gateway:
@@ -46,10 +43,11 @@ class Gateway:
             #allow for .gg or .com 
             domain = environ['domain'].split('/')[-1]
             self.socket = self.sio.connect(url=f'wss://trade.{domain}', socketio_path='/s/', headers={"User-agent": user_agent}, transports=['websocket'], namespaces=['/trade'])
-        else:
-            print(f"Setup ELSE triggered: {vars(self)}")
     
     def identify(self):
+        """ Fires the identify frames to the server, identifying the user
+        """        
+        # Retry sending identify if it fails up to 5 times, with an increased delay between frames
         for i in range(0, 5):
             try:
                 self.auth = self.metadata.get_identify()
@@ -57,11 +55,11 @@ class Gateway:
                 self.is_authed = True
                 break
             except:
-                print("Failed to identify, retrying...")
+                self.events.trigger("on_error", {"error": "Failed to identify. Retry attempt {i}"})
                 sleep(i)
                 continue
         if self.is_authed is False:
-            self.events.trigger("on_error", "Failed to identify")
+            self.events.trigger("on_error", {"error": "Failed to identify. Retry attempts exhausted"})
             self.disconnect()
     
     def on(self, event, handler):
@@ -76,10 +74,14 @@ class Gateway:
         self.sio.emit(event, data, namespace)
             
     def disconnect(self):
+        """ Disconnects the socket
+        """        
         self.has_disconnected = True
         self.sio.disconnect()
 
     def connected(self):
+        """ Trigger the on_connected event on first connection and on_reconnection if connection is re-established
+        """        
         self.is_connected = True
         if self.is_reconnecting:
             self.events.trigger("on_reconnect", True)
@@ -87,6 +89,8 @@ class Gateway:
             self.events.trigger("on_connected", True)
         
     def disconnected(self):
+        """ Built in function for handling disconnection triggers reconnection if not manually disconnected
+        """        
         if self.has_disconnected is False:
             # if the user has not disconnected
             self.is_authed = False
@@ -95,14 +99,21 @@ class Gateway:
             self.is_connected = False
             self.events.trigger("on_disconnected", True)
 
-    
-    #todo handle reconnection
-        
     def connect_error(self, data):
+        """Map the connect_error event to the on_error event
+
+        Args:
+            data (dict): Data related to the error
+        """        
         self.events.trigger("on_error", data)
         self.disconnect()
 
     def init_handler(self, data):
+        """Map the init socket event to the on_init event
+
+        Args:
+            data (dict): Data related to the init event
+        """        
         self.is_authed = data['authenticated']
         self.events.trigger("on_init", data)
 
@@ -112,18 +123,47 @@ class Gateway:
         self.send('timesync', now)
     
     def new_item_handler(self, data):
+        """Map the new item socket event to the on_new_item event
+
+        Args:
+            data (dict): Data related to the new item event
+        """   
         self.events.trigger("on_new_item", data)
         
     def updated_item_handler(self, data):
+        """Map the updated item socket event to the on_updated_item event
+
+        Args:
+            data (dict): Data related to the updated item event
+        """        
         self.events.trigger("on_updated_item", data)
         
     def auction_update_handler(self, data):
+        """Map the auction update socket event to the on_auction_update event
+
+        Args:
+            data (dict): Data related to the auction update event
+        """        
         self.events.trigger("on_auction_update", data)
         
     def deleted_item_handler(self, data):
+        """Map the deleted item socket event to the on_deleted_item event
+
+        Args:
+            data (dict): Data related to the deleted item event
+        """        
         self.events.trigger("on_deleted_item", data)
         
     def trade_status_handler(self, data):
+        """ Handles trade status, this triggers both on_trade_status & the specific event being triggered here
+        
+        For example:
+        
+        A trade with the status of -1 would trigger both on_trade_status & on_trade_error
+
+        Args:
+            data (dict): Data related to the trade_status event
+        """        
         trade_status_enum = {
         -1: "error",
         0: "pending",
