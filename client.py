@@ -9,7 +9,7 @@ from os import environ as env
 from .metadata import Metadata
 from .gateway import Gateway
 from .deposits import Deposits
-from ._types import ApiKeyMissing, InvalidApiKey
+from ._types import *
 from observable import Observable
 
 class Client():
@@ -83,12 +83,23 @@ class Client():
     
     def get_user(self):
         return self.metadata.get_user()
+    
         
     #deposit related functions
     
     def get_active_deposits(self):
         return self.deposits.get_active_deposits()
     
-        
+    def get_inventory(self, filter: bool = True):
+        if filter:
+            inventory = self.deposits.get_inventory()
+            return [item for item in inventory if item['tradable'] == True and item['market_value'] > 0]
+        else:
+            return self.deposits.get_inventory()
+    
+    #gateway related functions
+    
+    def disconnect(self):
+        self.gateway.disconnect()
     
     
