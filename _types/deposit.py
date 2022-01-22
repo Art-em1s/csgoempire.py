@@ -1,7 +1,7 @@
 import requests
 from .exceptions import RequestError, InvalidApiKey
-from .item import Item
 from os import environ as env
+from json import dumps
 
 class Deposit(dict):
     def __init__(self, *args, **kwargs):
@@ -43,4 +43,19 @@ class Deposit(dict):
         else:
             raise RequestError(response)
         
+    def list_item(self, percentage):
+        url = self.api_base_url+"trading/deposit"
+        coin_value = self.market_value * (percentage/100+1)
+        params = dumps({ "items": [ { "id": self.id, "custom_price_percentage": percentage, "coin_value": coin_value} ] })
+        response = requests.post(url, headers=self.headers, data=params)
+        
+        status = response.status_code
+        response = response.json()
+        
+        if status == 200:
+            return True
+        elif response['invalid_api_token']:
+            raise InvalidApiKey()
+        else:
+            raise RequestError(response)
     
