@@ -1,4 +1,5 @@
 
+from urllib import response
 import requests
 from ._types import InvalidApiKey, RequestError
 from ._types import Deposit
@@ -32,3 +33,21 @@ class Deposits(dict):
         else:
             raise RequestError(response)
             
+    def get_inventory(self):
+        url = self.api_base_url+"trading/user/inventory"
+        response = requests.get(url, headers=self.headers)
+        
+        status = response.status_code
+        response = response.json()
+        
+        inventory = []
+        app = inventory.append
+        
+        if status == 200:
+            for item in response['data']:
+                app(Deposit(item))
+            return inventory
+        elif response['invalid_api_token']:
+            raise InvalidApiKey()
+        else:
+            raise RequestError(response)
