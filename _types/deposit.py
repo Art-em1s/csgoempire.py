@@ -29,7 +29,18 @@ class Deposit(dict):
         else:
             raise RequestError(response)
         
-    def get_items(self):
-        return [Item(item) for item in self.items]
+    def sell_now(self):
+        url = self.api_base_url+"trading/deposits/{}/sell".format(self.id)
+        response = requests.post(url, headers=self.headers)
+        
+        status = response.status_code
+        response = response.json()
+        
+        if status == 200:
+            return True
+        elif response['invalid_api_token']:
+            raise InvalidApiKey()
+        else:
+            raise RequestError(response)
         
     
