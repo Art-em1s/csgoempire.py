@@ -63,8 +63,7 @@ class Metadata():
         return self.user.id
         
     def get_identify(self):
-        if self.metadata is None:
-            self.set_metadata()
+        self.set_metadata() #force get idenitfy to update metadata
             
         auth = {
             "uid": self.get_user_id(),

@@ -49,15 +49,14 @@ class Gateway:
         """        
         # Retry sending identify if it fails up to 5 times, with an increased delay between frames
         for i in range(0, 5):
-            try:
+            sleep(i)
+            if self.is_authed is False:
                 self.auth = self.metadata.get_identify()
                 self.send('identify', self.auth, namespace='/trade')
-                self.is_authed = True
+            else:
                 break
-            except:
-                self.events.trigger("on_error", {"error": "Failed to identify. Retry attempt {i}"})
-                sleep(i)
-                continue
+            if i>0:
+                self.events.trigger("on_error", {"error": f"Failed to identify. Retry attempt {i}"})
         if self.is_authed is False:
             self.events.trigger("on_error", {"error": "Failed to identify. Retry attempts exhausted"})
             self.disconnect()
