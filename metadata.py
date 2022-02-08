@@ -1,4 +1,4 @@
-from ._types import Meta, InvalidApiKey, User
+from ._types import Meta, InvalidApiKey, User, RequestError, ExceedsRatelimit
 import requests
 
 from os import environ as env
@@ -30,10 +30,13 @@ class Metadata():
         if status == 200:
             self.metadata = Meta(response)
             self.user = User(self.metadata.user)
-        elif response['invalid_api_token']:
-            raise InvalidApiKey()
         else:
-            print(response)
+            if status == 401:
+                raise InvalidApiKey()
+            elif status == 429:
+                raise ExceedsRatelimit(response['message'])
+            else:
+                raise RequestError(response)
         
     def get_metadata(self):
         if self.metadata is None:
