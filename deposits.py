@@ -1,7 +1,8 @@
 
+from calendar import c
 from urllib import response
 import requests
-from ._types import InvalidApiKey, RequestError
+from ._types import InvalidApiKey, RequestError, ExceedsRatelimit
 from ._types import Deposit
 from os import environ as env
 
@@ -28,10 +29,13 @@ class Deposits(dict):
             for item in response['data']['deposits']:
                 app(Deposit(item))
             return active_deposits
-        elif response['invalid_api_token']:
-            raise InvalidApiKey()
         else:
-            raise RequestError(response)
+            if status == 401:
+                raise InvalidApiKey()
+            elif status == 429:
+                raise ExceedsRatelimit(response['message'])
+            else:
+                raise RequestError(response)
             
     def get_inventory(self):
         url = self.api_base_url+"trading/user/inventory"
@@ -45,9 +49,14 @@ class Deposits(dict):
         
         if status == 200:
             for item in response['data']:
+                if "invalid" in item or item['market_value'] < 0 or item['tradable'] == False:
+                    continue
                 app(Deposit(item))
             return inventory
-        elif response['invalid_api_token']:
-            raise InvalidApiKey()
         else:
-            raise RequestError(response)
+            if status == 401:
+                raise InvalidApiKey()
+            elif status == 429:
+                raise ExceedsRatelimit(response['message'])
+            else:
+                raise RequestError(response)

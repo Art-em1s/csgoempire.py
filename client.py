@@ -9,6 +9,7 @@ from os import environ as env
 from .metadata import Metadata
 from .gateway import Gateway
 from .deposits import Deposits
+from .withdrawals import Withdrawals
 from ._types import *
 from observable import Observable
 
@@ -42,8 +43,9 @@ class Client():
         #validate api key using set metadata
         self.validate_api_key()
 
-        #if validated, setup deposits
+        #if validated, setup deposits/withdrawals
         self.deposits = Deposits()
+        self.withdrawals = Withdrawals()
         
         #if client initalised with socket enabled, setup gateway
         if socket_enabled:
@@ -95,6 +97,11 @@ class Client():
             return [item for item in inventory if item['tradable'] == True and item['market_value'] > 0]
         else:
             return self.deposits.get_inventory()
+        
+    #withdrawal related functions
+    
+    def get_auctions(self, **kwargs):
+        return self.withdrawals.get_items(**kwargs)
     
     #gateway related functions
     

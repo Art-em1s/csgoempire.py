@@ -1,5 +1,7 @@
 import re
 import requests, json
+from ._types import InvalidApiKey, RequestError, ExceedsRatelimit
+
 from os import environ as env
 
 class Withdrawals(dict):
@@ -24,11 +26,27 @@ class Withdrawals(dict):
         if status == 200:
             return True
         else:
-            return response
+            if status == 401:
+                raise InvalidApiKey()
+            elif status == 429:
+                raise ExceedsRatelimit(response['message'])
+            else:
+                raise RequestError(response)
 
-    def get_items(self, per_page: int = 5000, page: int = 1, order: str = "desc", auction: str = "yes", price_min: int = 1, price_max: int = 1000, price_max_above: int = 0, search: str = ""):
+    def get_items(self, per_page: int = 5000, page: int = 1, search: str = "", order: str = "market_value", sort="desc", auction: str = "yes", price_min: int = 1, price_max: int = 100000, price_max_above: int = 15):
         if search == "":
-            url = self.api_base_url+f"trading/items?per_page={per_page}&page={page}&order={order}&auction={auction}&price_min={price_min}&price_max={price_max}&price_max_above={price_max_above}"
+            url = self.api_base_url+f"trading/items?per_page={per_page}&page={page}&order={order}&sort={sort}&auction={auction}&price_min={price_min}&price_max={price_max}&price_max_above={price_max_above}"
         else:
-            url = self.api_base_url+f"trading/items?per_page={per_page}&page={page}&order={order}&auction={auction}&price_min={price_min}&price_max={price_max}&price_max_above={price_max_above}&search={search}"
-        return requests.get(url, headers=self.headers).json()        
+            url = self.api_base_url+f"trading/items?per_page={per_page}&page={page}&search={search}&order={order}&sort={sort}&auction={auction}&price_min={price_min}&price_max={price_max}&price_max_above={price_max_above}"
+        response = requests.get(url, headers=self.headers)
+        status = response.status_code
+        response = response.json()
+        if status == 200:
+            return response['data']
+        else:
+            if status == 401:
+                raise InvalidApiKey()
+            elif status == 429:
+                raise ExceedsRatelimit(response['message'])
+            else:
+                raise RequestError(response)

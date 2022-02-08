@@ -27,3 +27,11 @@ class InvalidDomain(Exception):
         
     def __str__(self):
         return self.message
+    
+#todo: see 'client.py:L21'
+class ExceedsRatelimit(Exception):
+    def __init__(self, message):
+        self.message = message
+        
+    def __str__(self):
+        return self.message
