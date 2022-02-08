@@ -52,6 +52,7 @@ class Gateway:
             sleep(i)
             if self.is_authed is False:
                 self.auth = self.metadata.get_identify()
+                print(f"Sending identify frame: {self.auth['authorizationToken']} ({i})")
                 self.send('identify', self.auth, namespace='/trade')
             else:
                 break
@@ -94,6 +95,7 @@ class Gateway:
         """        
         if self.has_disconnected is False:
             # if the user has not disconnected
+            self.is_reconnecting = True
             self.is_authed = False
             self.identify()
         else:

@@ -29,9 +29,9 @@ class Withdrawals(dict):
             if status == 401:
                 raise InvalidApiKey()
             elif status == 429:
-                raise ExceedsRatelimit(response['message'])
+                raise ExceedsRatelimit(f"Withdrawal:Bid: {response['message']}")
             else:
-                raise RequestError(response)
+                raise RequestError(f"Withdrawal:Bid: {response['message']}")
 
     def get_items(self, per_page: int = 5000, page: int = 1, search: str = "", order: str = "market_value", sort="desc", auction: str = "yes", price_min: int = 1, price_max: int = 100000, price_max_above: int = 15):
         if search == "":
@@ -47,6 +47,6 @@ class Withdrawals(dict):
             if status == 401:
                 raise InvalidApiKey()
             elif status == 429:
-                raise ExceedsRatelimit(response['message'])
+                raise ExceedsRatelimit(f"Withdrawal:Get_items: {response['message']}")
             else:
-                raise RequestError(response)
+                raise RequestError(f"Withdrawal:Get_items: {response['message']}")

@@ -1,5 +1,5 @@
 import requests
-from .exceptions import RequestError, InvalidApiKey
+from .exceptions import InvalidApiKey, RequestError, ExceedsRatelimit
 from os import environ as env
 from json import dumps
 
@@ -24,10 +24,13 @@ class Deposit(dict):
         
         if status == 200:
             return True
-        elif response['invalid_api_token']:
-            raise InvalidApiKey()
         else:
-            raise RequestError(response)
+            if status == 401:
+                raise InvalidApiKey()
+            elif status == 429:
+                raise ExceedsRatelimit(f"Deposit:Cancel: {response['message']}")
+            else:
+                raise RequestError(f"Deposit:Cancel: {response['message']}")
         
     def sell_now(self):
         url = self.api_base_url+"trading/deposits/{}/sell".format(self.id)
@@ -54,8 +57,11 @@ class Deposit(dict):
         
         if status == 200:
             return True
-        elif response['invalid_api_token']:
-            raise InvalidApiKey()
         else:
-            raise RequestError(response)
+            if status == 401:
+                raise InvalidApiKey()
+            elif status == 429:
+                raise ExceedsRatelimit(f"Deposit:List_item: {response['message']}")
+            else:
+                raise RequestError(f"Deposit:List_item: {response['message']}")
     
