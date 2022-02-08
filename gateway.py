@@ -60,6 +60,8 @@ class Gateway:
         if self.is_authed is False:
             self.events.trigger("on_error", {"error": "Failed to identify. Retry attempts exhausted"})
             self.disconnect()
+        else:
+            self.events.trigger("on_ready", True)
     
     def on(self, event, handler):
         self.events.on(event, handler)

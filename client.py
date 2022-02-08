@@ -48,10 +48,9 @@ class Client():
         #if client initalised with socket enabled, setup gateway
         if socket_enabled:
             #setup socket in background
-            self.gateway = Gateway()
-            self.events = self.gateway.get_events()
-            self.socket = Thread(target=self.gateway.setup())
-        
+            self.initalise_socket()
+            
+
     #metadata related functions
         
     def get_metadata(self):
@@ -102,4 +101,7 @@ class Client():
     def disconnect(self):
         self.gateway.disconnect()
     
-    
+    def initalise_socket(self):
+        self.gateway = Gateway()
+        self.events = self.gateway.get_events()
+        self.socket = Thread(target=self.gateway.setup())
