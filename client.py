@@ -11,10 +11,9 @@ from .gateway import Gateway
 from .deposits import Deposits
 from .withdrawals import Withdrawals
 from ._types import *
-from observable import Observable
 
 class Client():
-    def __init__(self, token=None, domain="https://csgoempire.com", socket_enabled=True):
+    def __init__(self, token=None, domain="https://csgoempire.com", socket_enabled=True, debug_enabled=False):
         
         if token is None:
             raise ApiKeyMissing()
@@ -50,7 +49,7 @@ class Client():
         #if client initalised with socket enabled, setup gateway
         if socket_enabled:
             #setup socket in background
-            self.initalise_socket()
+            self.initalise_socket(debug=debug_enabled)
             
 
     #metadata related functions
@@ -108,7 +107,14 @@ class Client():
     def disconnect(self):
         self.gateway.disconnect()
     
-    def initalise_socket(self):
-        self.gateway = Gateway()
+    def initalise_socket(self, debug=False):
+        self.gateway = Gateway(debug=debug)
+        self.socket = self.gateway.setup()
         self.events = self.gateway.get_events()
-        self.socket = Thread(target=self.gateway.setup())
+        
+    def kill_connection(self):
+        self.gateway.kill_connection()
+        
+    def reconnect(self):
+        self.disconnect()
+        self.initalise_socket()

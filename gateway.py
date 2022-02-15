@@ -4,23 +4,26 @@ from os import kill, getpid, environ
 from time import time, sleep
 from .metadata import Metadata
 from observable import Observable
+from json import dumps
+from ._types import RequestError
 
 # TODO:
 # docstring comments, see https://discord.com/channels/@me/557952164627087360/926697708222283846 for example
 
 
 class Gateway:
-    def __init__(self):
+    def __init__(self, debug=False):
         self.is_connected = False # is the socket connected
         self.is_authed = False # is the user authenticated
         self.has_disconnected = False #triggered when manually disconnected, used to detect if manual dc, denotes reconnect behaviour
         self.is_reconnecting = False #triggered prior to reconnection, used to trigger reconnection event
         self.socket = None
         self.auth = None
-        self.sio = socketio.Client(logger=False, engineio_logger=False)
-        self.events = Observable()
+        self.sio = None
+        self.events = None
         self.metadata = Metadata()
-        
+        self.debug = debug
+                        
     def kill_connection(self):
         """ Kill the WS connection via SIGINT
         """        
@@ -28,21 +31,28 @@ class Gateway:
         kill(getpid(), SIGINT)
         
     def setup(self):
+        user_agent = f"{self.metadata.get_user_id()} API Bot | Python Library"
+        self.events = Observable()
         if self.is_connected is False and self.socket is None:
-            user_agent = f"{self.metadata.get_user_id()} API Bot | Python Library"
-            self.sio.on("connect", handler=self.connected)
-            self.sio.on("disconnect", handler=self.disconnected)
-            self.sio.on("connect_error", handler=self.connect_error)
-            
-            self.sio.on("init", handler=self.init_handler, namespace='/trade')
-            self.sio.on("new_item", handler=self.new_item_handler, namespace='/trade')
-            self.sio.on("updated_item", handler=self.updated_item_handler, namespace='/trade')
-            self.sio.on("auction_update", handler=self.auction_update_handler, namespace='/trade')
-            self.sio.on("deleted_item", handler=self.deleted_item_handler, namespace='/trade')
-            self.sio.on("trade_status", handler=self.trade_status_handler, namespace='/trade')
+            if self.debug is True:
+                self.sio = socketio.Client(logger=True, engineio_logger=True)
+            else:
+                self.sio = socketio.Client(logger=False, engineio_logger=False)
+           
             #allow for .gg or .com 
             domain = environ['domain'].split('/')[-1]
             self.socket = self.sio.connect(url=f'wss://trade.{domain}', socketio_path='/s/', headers={"User-agent": user_agent}, transports=['websocket'], namespaces=['/trade'])
+        self.sio.on("connect", handler=self.connected)
+        self.sio.on("disconnect", handler=self.disconnected)
+        self.sio.on("connect_error", handler=self.connect_error)
+        
+        self.sio.on("init", handler=self.init_handler, namespace='/trade')
+        self.sio.on("new_item", handler=self.new_item_handler, namespace='/trade')
+        self.sio.on("updated_item", handler=self.updated_item_handler, namespace='/trade')
+        self.sio.on("auction_update", handler=self.auction_update_handler, namespace='/trade')
+        self.sio.on("deleted_item", handler=self.deleted_item_handler, namespace='/trade')
+        self.sio.on("trade_status", handler=self.trade_status_handler, namespace='/trade')
+        
     
     def identify(self):
         """ Fires the identify frames to the server, identifying the user
@@ -52,24 +62,24 @@ class Gateway:
             sleep(i)
             if self.is_authed is False:
                 self.auth = self.metadata.get_identify()
-                print(f"Sending identify frame: {self.auth['authorizationToken']} ({i})")
                 self.send('identify', self.auth, namespace='/trade')
             else:
                 break
-            if i>0:
-                self.events.trigger("on_error", {"error": f"Failed to identify. Retry attempt {i}"})
+            if i>0 and self.events is not None: #todo this shouldn't be none on trigger
+                print(f"Failed to identify. Retry attempt {i}")
         if self.is_authed is False:
-            self.events.trigger("on_error", {"error": "Failed to identify. Retry attempts exhausted"})
-            self.disconnect()
+            raise RequestError("Failed to identify. Retry attempts exhausted")
         else:
             self.events.trigger("on_ready", True)
-    
+        
     def on(self, event, handler):
         self.events.on(event, handler)
         
     def get_events(self):
         """ Returns the events object
         """
+        if self.events is None:
+            self.events = Observable()
         return self.events
             
     def send(self, event, data, namespace='/trade'):
@@ -94,6 +104,7 @@ class Gateway:
         """ Built in function for handling disconnection triggers reconnection if not manually disconnected
         """        
         if self.has_disconnected is False:
+            self.events = None
             # if the user has not disconnected
             self.is_reconnecting = True
             self.is_authed = False
@@ -109,14 +120,14 @@ class Gateway:
             data (dict): Data related to the error
         """        
         self.events.trigger("on_error", data)
-        self.disconnect()
 
     def init_handler(self, data):
         """Map the init socket event to the on_init event
 
         Args:
             data (dict): Data related to the init event
-        """        
+        """     
+        sorted_data = dumps(data, indent=4, sort_keys=True)   
         self.is_authed = data['authenticated']
         self.events.trigger("on_init", data)
 
