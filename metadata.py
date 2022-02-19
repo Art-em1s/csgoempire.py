@@ -81,3 +81,8 @@ class Metadata():
         }
         
         return auth
+    
+    def get_balance(self):
+        if self.metadata is None or time() - self.last_update > self.metadata_update_period:
+            self.set_metadata()
+        return self.user.balance

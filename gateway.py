@@ -12,7 +12,8 @@ from ._types import RequestError
 
 
 class Gateway:
-    def __init__(self, debug=False):
+    #logger
+    def __init__(self, logger=False, engineio_logger=False):
         self.is_connected = False # is the socket connected
         self.is_authed = False # is the user authenticated
         self.has_disconnected = False #triggered when manually disconnected, used to detect if manual dc, denotes reconnect behaviour
@@ -22,7 +23,8 @@ class Gateway:
         self.sio = None
         self.events = None
         self.metadata = Metadata()
-        self.debug = debug
+        self.debug_logger = logger
+        self.debug_engineio_logger = engineio_logger
                         
     def kill_connection(self):
         """ Kill the WS connection via SIGINT
@@ -34,10 +36,7 @@ class Gateway:
         user_agent = f"{self.metadata.get_user_id()} API Bot | Python Library"
         self.events = Observable()
         if self.is_connected is False and self.socket is None:
-            if self.debug is True:
-                self.sio = socketio.Client(logger=True, engineio_logger=True)
-            else:
-                self.sio = socketio.Client(logger=False, engineio_logger=False)
+            self.sio = socketio.Client(logger=self.debug_logger, engineio_logger=self.debug_engineio_logger)
            
             #allow for .gg or .com 
             domain = environ['domain'].split('/')[-1]
@@ -84,6 +83,11 @@ class Gateway:
             
     def send(self, event, data, namespace='/trade'):
         self.sio.emit(event, data, namespace)
+            
+    def dc(self):
+        """ Disconnects the socket without updating has_disconnected, used in reconnection logic
+        """        
+        self.sio.disconnect()
             
     def disconnect(self):
         """ Disconnects the socket

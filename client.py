@@ -13,7 +13,7 @@ from .withdrawals import Withdrawals
 from ._types import *
 
 class Client():
-    def __init__(self, token=None, domain="https://csgoempire.com", socket_enabled=True, debug_enabled=False):
+    def __init__(self, token=None, domain="https://csgoempire.com", socket_enabled=True, socket_logger_enabled=False, engineio_logger_enabled=False):
         
         if token is None:
             raise ApiKeyMissing()
@@ -49,13 +49,16 @@ class Client():
         #if client initalised with socket enabled, setup gateway
         if socket_enabled:
             #setup socket in background
-            self.initalise_socket(debug=debug_enabled)
+            self.initalise_socket(logger=socket_logger_enabled, engineio_logger=engineio_logger_enabled)
             
 
     #metadata related functions
         
     def get_metadata(self):
         return self.metadata.get_metadata()
+
+    def get_balance(self):
+        return self.metadata.get_balance()
         
     def get_socket_token(self):
         return self.metadata.get_socket_token()
@@ -106,9 +109,9 @@ class Client():
     
     def disconnect(self):
         self.gateway.disconnect()
-    
-    def initalise_socket(self, debug=False):
-        self.gateway = Gateway(debug=debug)
+        
+    def initalise_socket(self, logger=False, engineio_logger=False):
+        self.gateway = Gateway(logger, engineio_logger)
         self.socket = self.gateway.setup()
         self.events = self.gateway.get_events()
         
@@ -116,5 +119,5 @@ class Client():
         self.gateway.kill_connection()
         
     def reconnect(self):
-        self.disconnect()
+        self.gateway.dc()
         self.initalise_socket()
