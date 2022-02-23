@@ -121,9 +121,9 @@ class Gateway:
         """     
         sorted_data = dumps(data, indent=4, sort_keys=True)   
         self.is_authed = data['authenticated']
+        self.events.trigger("on_init", data)
         if self.is_authed:
             self.events.trigger("on_ready", True)
-        self.events.trigger("on_init", data)
 
     def timesync_handler(self):
         # TODO: investigate why this is needed
