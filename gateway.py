@@ -44,30 +44,20 @@ class Gateway:
         self.sio.on("connect", handler=self.connected)
         self.sio.on("disconnect", handler=self.disconnected)
         self.sio.on("connect_error", handler=self.connect_error)
-        
         self.sio.on("init", handler=self.init_handler, namespace='/trade')
         self.sio.on("new_item", handler=self.new_item_handler, namespace='/trade')
         self.sio.on("updated_item", handler=self.updated_item_handler, namespace='/trade')
         self.sio.on("auction_update", handler=self.auction_update_handler, namespace='/trade')
         self.sio.on("deleted_item", handler=self.deleted_item_handler, namespace='/trade')
         self.sio.on("trade_status", handler=self.trade_status_handler, namespace='/trade')
-        
-    
+            
     def identify(self):
         """ Fires the identify frames to the server, identifying the user
         """        
         # Retry sending identify if it fails up to 5 times, with an increased delay between frames
-        for i in range(0, 5):
-            sleep(i)
-            if self.is_authed is False:
-                self.auth = self.metadata.get_identify()
-                self.send('identify', self.auth, namespace='/trade')
-            else:
-                break
-            if i>0 and self.events is not None: #todo this shouldn't be none on trigger
-                print(f"Failed to identify. Retry attempt {i}")
         if self.is_authed is False:
-            raise RequestError("Failed to identify. Retry attempts exhausted")
+            self.auth = self.metadata.get_identify()
+            self.send('identify', self.auth, namespace='/trade')
         else:
             self.events.trigger("on_ready", True)
         
