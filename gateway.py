@@ -54,12 +54,10 @@ class Gateway:
     def identify(self):
         """ Fires the identify frames to the server, identifying the user
         """        
-        # Retry sending identify if it fails up to 5 times, with an increased delay between frames
         if self.is_authed is False:
             self.auth = self.metadata.get_identify()
             self.send('identify', self.auth, namespace='/trade')
-        else:
-            self.events.trigger("on_ready", True)
+           
         
     def on(self, event, handler):
         self.events.on(event, handler)
@@ -123,6 +121,8 @@ class Gateway:
         """     
         sorted_data = dumps(data, indent=4, sort_keys=True)   
         self.is_authed = data['authenticated']
+        if self.is_authed:
+            self.events.trigger("on_ready", True)
         self.events.trigger("on_init", data)
 
     def timesync_handler(self):
