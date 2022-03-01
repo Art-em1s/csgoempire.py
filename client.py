@@ -114,10 +114,13 @@ class Client():
         self.gateway = Gateway(logger, engineio_logger)
         self.socket = self.gateway.setup()
         self.events = self.gateway.get_events()
-        
+                
     def kill_connection(self):
         self.gateway.kill_connection()
         
     def reconnect(self):
         self.gateway.dc()
+        self.gateway = None
+        self.socket = None
+        self.events = None
         self.initalise_socket()

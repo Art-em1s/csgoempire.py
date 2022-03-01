@@ -36,7 +36,7 @@ class Gateway:
         user_agent = f"{self.metadata.get_user_id()} API Bot | Python Library"
         self.events = Observable()
         if self.is_connected is False and self.socket is None:
-            self.sio = socketio.Client(logger=self.debug_logger, engineio_logger=self.debug_engineio_logger)
+            self.sio = socketio.Client(logger=self.debug_logger, engineio_logger=self.debug_engineio_logger, reconnection=False)
            
             #allow for .gg or .com 
             domain = environ['domain'].split('/')[-1]
@@ -57,7 +57,8 @@ class Gateway:
         if self.is_authed is False:
             self.auth = self.metadata.get_identify()
             self.send('identify', self.auth, namespace='/trade')
-           
+        else:
+            print("Identify triggered, but user is already authenticated")
         
     def on(self, event, handler):
         self.events.on(event, handler)
@@ -89,6 +90,7 @@ class Gateway:
         self.is_connected = True
         if self.is_reconnecting:
             self.events.trigger("on_reconnect", True)
+            self.is_reconnecting = False
         else:
             self.events.trigger("on_connected", True)
         
