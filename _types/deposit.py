@@ -48,7 +48,7 @@ class Deposit(dict):
         
     def list_item(self, percentage):
         url = self.api_base_url+"trading/deposit"
-        coin_value = self.market_value * (percentage/100+1)
+        coin_value = round(self.market_value * (percentage/100+1))
         params = dumps({ "items": [ { "id": self.id, "custom_price_percentage": percentage, "coin_value": coin_value} ] })
         response = requests.post(url, headers=self.headers, data=params)
         

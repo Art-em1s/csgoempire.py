@@ -33,6 +33,22 @@ class Withdrawals(dict):
             else:
                 raise RequestError(f"Withdrawal:Bid: {response['message']}")
 
+    def withdraw(self, item_id: int):
+        url = self.api_base_url + f"trading/deposit/{item_id}/withdraw"
+        response = requests.post(url, headers=self.headers)
+        status = response.status_code
+        response = response.json()
+
+        if status == 200:
+            return True
+        else:
+            if status == 401:
+                raise InvalidApiKey()
+            elif status == 429:
+                raise ExceedsRatelimit(f"Withdrawal:Buy: {response['message']}")
+            else:
+                raise RequestError(f"Withdrawal:Buy: {response['message']}")
+
     def get_items(self, per_page: int = 5000, page: int = 1, search: str = "", order: str = "market_value", sort="desc", auction: str = "yes", price_min: int = 1, price_max: int = 100000, price_max_above: int = 15):
         if search == "":
             url = self.api_base_url+f"trading/items?per_page={per_page}&page={page}&order={order}&sort={sort}&auction={auction}&price_min={price_min}&price_max={price_max}&price_max_above={price_max_above}"
