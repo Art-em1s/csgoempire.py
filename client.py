@@ -105,6 +105,8 @@ class Client():
     def get_auctions(self, **kwargs):
         return self.withdrawals.get_items(**kwargs)
     
+    get_withdrawals = get_auctions
+    
     #gateway related functions
     
     def disconnect(self):

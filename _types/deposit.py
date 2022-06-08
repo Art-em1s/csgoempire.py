@@ -44,7 +44,7 @@ class Deposit(dict):
         elif response['invalid_api_token']:
             raise InvalidApiKey()
         else:
-            raise RequestError(response)
+            raise RequestError(f"Deposit:SellNow: {response}")
         
     def list_item(self, percentage):
         url = self.api_base_url+"trading/deposit"
