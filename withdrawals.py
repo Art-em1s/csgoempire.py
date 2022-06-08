@@ -62,9 +62,7 @@ class Withdrawals(dict):
                 url = self.api_base_url+f"trading/items?per_page={per_page}&page={i}&search={search}&order={order}&sort={sort}&auction={auction}&price_min={price_min}&price_max={price_max}&price_max_above={price_max_above}"
             response = requests.get(url, headers=self.headers)
             status = response.status_code
-            print(status)
             response = response.json()
-            print(len(response['data']))
             if status == 200:
                 app(response['data'])
             else:
