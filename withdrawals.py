@@ -3,7 +3,7 @@ import requests, json
 from ._types import InvalidApiKey, RequestError, ExceedsRatelimit
 
 from os import environ as env
-from time import sleep
+from time import sleep, time
 
 class Withdrawals(dict):
     def __init__(self, *args, **kwargs):
@@ -58,8 +58,11 @@ class Withdrawals(dict):
         for i in range(2, response['last_page']+1):
             if search == "":
                 url = self.api_base_url+f"trading/items?per_page={per_page}&page={i}&order={order}&sort={sort}&auction={auction}&price_min={price_min}&price_max={price_max}&price_max_above={price_max_above}"
+                ratelimit_delay = 3.4
             else:
                 url = self.api_base_url+f"trading/items?per_page={per_page}&page={i}&search={search}&order={order}&sort={sort}&auction={auction}&price_min={price_min}&price_max={price_max}&price_max_above={price_max_above}"
+                ratelimit_delay = 3.1
+            start = int(time())
             response = requests.get(url, headers=self.headers)
             status = response.status_code
             response = response.json()
@@ -72,6 +75,8 @@ class Withdrawals(dict):
                     raise ExceedsRatelimit(f"Withdrawal:Get_items: {response['message']}")
                 else:
                     raise RequestError(f"Withdrawal:Get_items: {response['message']}")
-            sleep(0.05) #avoid ratelimits
+            delta = int(time())-start
+            if delta < ratelimit_delay:  # If the request takes less than 3 seconds, sleep for 3 seconds - otherwise, the ratelimit will be exceeded
+                sleep(ratelimit_delay-delta)
         return items
             
