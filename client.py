@@ -93,12 +93,12 @@ class Client():
     def get_active_deposits(self):
         return self.deposits.get_active_deposits()
     
-    def get_inventory(self, filter: bool = True):
+    def get_inventory(self, filter: bool = True, force_refresh = False):
         if filter:
-            inventory = self.deposits.get_inventory()
+            inventory = self.deposits.get_inventory(force_refresh)
             return [item for item in inventory if item['tradable'] == True and item['market_value'] > 0]
         else:
-            return self.deposits.get_inventory()
+            return self.deposits.get_inventory(force_refresh)
         
     #withdrawal related functions
     
