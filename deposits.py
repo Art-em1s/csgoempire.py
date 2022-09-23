@@ -38,7 +38,7 @@ class Deposits(dict):
                 raise RequestError(f"Deposits:get_active_deposits: {response['message']}")
             
     def get_inventory(self, force_refresh=False):
-        url = self.api_base_url+"trading/user/inventory"+str(force_refresh)
+        url = self.api_base_url+"trading/user/inventory?update="+str(force_refresh)
         response = requests.get(url, headers=self.headers)
         
         status = response.status_code
