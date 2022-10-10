@@ -75,7 +75,8 @@ class Gateway:
             
     def dc(self):
         """ Disconnects the socket without updating has_disconnected, used in reconnection logic
-        """        
+        """
+        self.is_authed = False #reset auth
         self.sio.disconnect()
             
     def disconnect(self):
@@ -126,11 +127,6 @@ class Gateway:
         self.events.trigger("on_init", data)
         if self.is_authed:
             self.events.trigger("on_ready", True)
-
-    def timesync_handler(self):
-        # TODO: investigate why this is needed
-        now = time() * 1000 # get current time in milliseconds
-        self.send('timesync', now)
     
     def new_item_handler(self, data):
         """Map the new item socket event to the on_new_item event
