@@ -36,7 +36,7 @@ class Gateway:
         user_agent = f"{self.metadata.get_user_id()} API Bot | Python Library"
         self.events = Observable()
         if self.is_connected is False and self.socket is None:
-            self.sio = socketio.Client(logger=self.debug_logger, engineio_logger=self.debug_engineio_logger, reconnection=False)
+            self.sio = socketio.Client(logger=self.debug_logger, engineio_logger=self.debug_engineio_logger, reconnection=True)
            
             #allow for .gg or .com 
             domain = environ['domain'].split('/')[-1]
