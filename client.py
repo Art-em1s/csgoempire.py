@@ -120,9 +120,8 @@ class Client():
     def kill_connection(self):
         self.gateway.kill_connection()
         
-    def reconnect(self):
+    def dc(self):
         self.gateway.dc()
         self.gateway = None
         self.socket = None
         self.events = None
-        self.initalise_socket()
