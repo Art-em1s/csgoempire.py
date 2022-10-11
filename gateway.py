@@ -90,6 +90,8 @@ class Gateway:
         """        
         self.is_connected = True
         if self.is_reconnecting:
+            if self.events is None:
+                self.get_events()
             self.events.trigger("on_reconnect", True)
             self.is_reconnecting = False
         else:
