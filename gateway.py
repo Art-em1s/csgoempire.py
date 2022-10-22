@@ -98,14 +98,14 @@ class Gateway:
     def disconnected(self):
         """ Built in function for handling disconnection triggers reconnection if not manually disconnected
         """        
+        self.is_connected = False
+        self.is_authed = False
         if self.has_disconnected is False:
             self.events = None
             # if the user has not disconnected
             self.is_reconnecting = True
-            self.is_authed = False
-            self.identify()
+            # self.identify()
         else:
-            self.is_connected = False
             self.events.trigger("on_disconnected", True)
 
     def connect_error(self, data):
