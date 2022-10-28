@@ -28,7 +28,7 @@ class Gateway:
                         
     def kill_connection(self):
         """ Kill the WS connection via SIGINT
-        """        
+        """
         self.is_connected = False
         kill(getpid(), SIGINT)
         
@@ -53,7 +53,7 @@ class Gateway:
             
     def identify(self):
         """ Fires the identify frames to the server, identifying the user
-        """        
+        """
         if self.is_authed is False:
             self.auth = self.metadata.get_identify()
             self.send('identify', self.auth, namespace='/trade')
@@ -87,13 +87,13 @@ class Gateway:
             
     def disconnect(self):
         """ Disconnects the socket
-        """        
+        """
         self.has_disconnected = True
         self.sio.disconnect()
 
     def connected(self):
         """ Trigger the on_connected event on first connection and on_reconnection if connection is re-established
-        """        
+        """
         self.is_connected = True
         if self.is_reconnecting:
             if self.events is None:
@@ -105,7 +105,7 @@ class Gateway:
         
     def disconnected(self):
         """ Built in function for handling disconnection triggers reconnection if not manually disconnected
-        """        
+        """
         self.is_connected = False
         self.is_authed = False
         if self.has_disconnected is False:
@@ -121,7 +121,7 @@ class Gateway:
 
         Args:
             data (dict): Data related to the error
-        """        
+        """
         self.events.trigger("on_error", data)
 
     def init_handler(self, data):
@@ -142,32 +142,36 @@ class Gateway:
 
         Args:
             data (dict): Data related to the new item event
-        """   
-        self.events.trigger("on_new_item", data)
+        """
+        for item in data:
+            self.events.trigger("on_new_item", item)
         
     def updated_item_handler(self, data):
         """Map the updated item socket event to the on_updated_item event
 
         Args:
             data (dict): Data related to the updated item event
-        """        
-        self.events.trigger("on_updated_item", data)
+        """
+        for item in data:
+            self.events.trigger("on_updated_item", item)
         
     def auction_update_handler(self, data):
         """Map the auction update socket event to the on_auction_update event
 
         Args:
             data (dict): Data related to the auction update event
-        """        
-        self.events.trigger("on_auction_update", data)
+        """
+        for item in data:
+            self.events.trigger("on_auction_update", item)
         
     def deleted_item_handler(self, data):
         """Map the deleted item socket event to the on_deleted_item event
 
         Args:
             data (dict): Data related to the deleted item event
-        """        
-        self.events.trigger("on_deleted_item", data)
+        """
+        for item in data:
+            self.events.trigger("on_deleted_item", item)
         
     def trade_status_handler(self, data):
         """ Handles trade status, this triggers both on_trade_status & the specific event being triggered here
@@ -178,7 +182,7 @@ class Gateway:
 
         Args:
             data (dict): Data related to the trade_status event
-        """        
+        """
         trade_status_enum = {
         -1: "error",
         0: "pending",
