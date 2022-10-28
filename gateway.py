@@ -60,6 +60,12 @@ class Gateway:
         else:
             print("Identify triggered, but user is already authenticated")
         
+    def emit_filters(self):
+        """ Fire the default filter frame to ensure the client recieves all events. Triggered on init auth.
+        """
+        filter = {"price_max": 999999, "price_max_above": 999, "delivery_time_long_max": 9999}
+        self.send('filters', filter, namespace='/trade')
+        
     def on(self, event, handler):
         self.events.on(event, handler)
         
@@ -129,6 +135,7 @@ class Gateway:
         self.events.trigger("on_init", data)
         if self.is_authed:
             self.events.trigger("on_ready", True)
+            self.emit_filters()
     
     def new_item_handler(self, data):
         """Map the new item socket event to the on_new_item event
