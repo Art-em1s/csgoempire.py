@@ -143,6 +143,7 @@ class Gateway:
         Args:
             data (dict): Data related to the new item event
         """
+        data = data if isinstance(data, list) else [data]
         for item in data:
             self.events.trigger("on_new_item", item)
         
@@ -152,6 +153,7 @@ class Gateway:
         Args:
             data (dict): Data related to the updated item event
         """
+        data = data if isinstance(data, list) else [data]
         for item in data:
             self.events.trigger("on_updated_item", item)
         
@@ -161,6 +163,7 @@ class Gateway:
         Args:
             data (dict): Data related to the auction update event
         """
+        data = data if isinstance(data, list) else [data]
         for item in data:
             self.events.trigger("on_auction_update", item)
         
@@ -170,6 +173,7 @@ class Gateway:
         Args:
             data (dict): Data related to the deleted item event
         """
+        data = data if isinstance(data, list) else [data]
         for item in data:
             self.events.trigger("on_deleted_item", item)
         
