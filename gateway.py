@@ -1,11 +1,11 @@
 import socketio
 from signal import SIGINT
 from os import kill, getpid, environ
-from time import time, sleep
 from .metadata import Metadata
 from observable import Observable
 from json import dumps
-from ._types import RequestError
+from socketio import exceptions as socketio_exceptions
+
 
 # TODO:
 # docstring comments, see https://discord.com/channels/@me/557952164627087360/926697708222283846 for example
@@ -40,7 +40,13 @@ class Gateway:
            
             #allow for .gg or .com 
             domain = environ['domain'].split('/')[-1]
-            self.socket = self.sio.connect(url=f'wss://trade.{domain}', socketio_path='/s/', headers={"User-agent": user_agent}, transports=['websocket'], namespaces=['/trade'])
+            try:
+                self.socket = self.sio.connect(url=f'wss://trade.{domain}', socketio_path='/s/', headers={"User-agent": user_agent}, transports=['websocket'], namespaces=['/trade'])
+            except ConnectionError as e:
+                print(f"WS Connection error (0): {e}")
+            except Exception as e:
+                print(f"WS Connection error (1): {e}")
+            
         self.sio.on("connect", handler=self.connected)
         self.sio.on("disconnect", handler=self.disconnected)
         self.sio.on("connect_error", handler=self.connect_error)
@@ -63,8 +69,8 @@ class Gateway:
     def emit_filters(self):
         """ Fire the default filter frame to ensure the client recieves all events. Triggered on init auth.
         """
-        filter = {"price_max": 999999, "price_max_above": 999, "delivery_time_long_max": 9999}
-        self.send('filters', filter, namespace='/trade')
+        options = {"price_max": 999999, "price_max_above": 999, "delivery_time_long_max": 9999}
+        self.send('filters', options, namespace='/trade')
         
     def on(self, event, handler):
         self.events.on(event, handler)
