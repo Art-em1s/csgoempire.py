@@ -207,11 +207,13 @@ class Gateway:
         9: "timedout",
         10: "credited"
         }
-        #trigger on_trade_status event
-        self.events.trigger("on_trade_status", data)
+        data = data if isinstance(data, list) else [data]
         
-        #trigger specific event based on trade status
-        trade_status = data['data']['status']
-        self.events.trigger(f"on_trade_{trade_status_enum[trade_status]}", data)
+        for item in data:
+            self.events.trigger("on_trade_status", item)
+        
+            #trigger specific event based on trade status
+            trade_status = data['data']['status']
+            self.events.trigger(f"on_trade_{trade_status_enum[trade_status]}", item)
     
         
