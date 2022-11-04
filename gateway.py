@@ -210,7 +210,6 @@ class Gateway:
         data = data if isinstance(data, list) else [data]
         
         for item in data:
-            print(item)
             self.events.trigger("on_trade_status", item)
         
             #trigger specific event based on trade status
