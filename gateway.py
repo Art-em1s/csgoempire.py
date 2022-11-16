@@ -3,9 +3,6 @@ from signal import SIGINT
 from os import kill, getpid, environ
 from .metadata import Metadata
 from observable import Observable
-from json import dumps
-from socketio import exceptions as socketio_exceptions
-
 
 # TODO:
 # docstring comments, see https://discord.com/channels/@me/557952164627087360/926697708222283846 for example
@@ -42,10 +39,8 @@ class Gateway:
             domain = environ['domain'].split('/')[-1]
             try:
                 self.socket = self.sio.connect(url=f'wss://trade.{domain}', socketio_path='/s/', headers={"User-agent": user_agent}, transports=['websocket'], namespaces=['/trade'])
-            except ConnectionError as e:
-                print(f"WS Connection error (0): {e}")
             except Exception as e:
-                print(f"WS Connection error (1): {e}")
+                print(f"WS Connection error: {e}")
             
         self.sio.on("connect", handler=self.connected)
         self.sio.on("disconnect", handler=self.disconnected)
@@ -118,9 +113,8 @@ class Gateway:
         self.events.trigger("on_disconnected", True)
         if self.has_disconnected is False:
             self.events = None
-            # if the user has not disconnected
+            # if the user has not initiated the dc themselves
             self.is_reconnecting = True
-            # self.identify()
     
     def connect_error(self, data):
         """Map the connect_error event to the on_error event
@@ -142,6 +136,8 @@ class Gateway:
             self.is_authed = True
             self.events.trigger("on_ready", True)
             self.emit_filters()
+        else:
+            self.is_authed = False
     
     def new_item_handler(self, data):
         """Map the new item socket event to the on_new_item event
