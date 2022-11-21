@@ -64,8 +64,9 @@ class Gateway:
     def emit_filters(self):
         """ Fire the default filter frame to ensure the client recieves all events. Triggered on init auth.
         """
-        options = {"price_max": 999999, "price_max_above": 999, "delivery_time_long_max": 9999}
+        options = {"price_max": 999999, "price_max_above": 999, "delivery_time_long_max": 9999, "auction": "yes"}
         self.send('filters', options, namespace='/trade')
+        print("Filters emitted")
         
     def on(self, event, handler):
         self.events.on(event, handler)
@@ -134,8 +135,8 @@ class Gateway:
         self.events.trigger("on_init", data)
         if data['authenticated']:
             self.is_authed = True
-            self.events.trigger("on_ready", True)
             self.emit_filters()
+            self.events.trigger("on_ready", True)
         else:
             self.is_authed = False
     
