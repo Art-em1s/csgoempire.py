@@ -52,6 +52,7 @@ class Gateway:
         self.sio.on("auction_update", handler=self.auction_update_handler, namespace='/trade')
         self.sio.on("deleted_item", handler=self.deleted_item_handler, namespace='/trade')
         self.sio.on("trade_status", handler=self.trade_status_handler, namespace='/trade')
+        self.sio.on("deposit_failed", handler=self.failed_deposit_handler, namespace='/trade')
             
     def identify(self):
         """ Fires the identify frames to the server, identifying the user
@@ -179,6 +180,16 @@ class Gateway:
         data = data if isinstance(data, list) else [data]
         for item in data:
             self.events.trigger("on_deleted_item", item)
+            
+    def failed_deposit_handler(self, data):
+        """Map the failed deposit socket event to the on_failed_deposit event
+
+        Args:
+            data (dict): Data related to the failed deposit event
+        """
+        data = data if isinstance(data, list) else [data]
+        for item in data:
+            self.events.trigger("on_failed_deposit", item)
         
     def trade_status_handler(self, data):
         """ Handles trade status, this triggers both on_trade_status & the specific event being triggered here
