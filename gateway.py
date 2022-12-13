@@ -3,6 +3,7 @@ from signal import SIGINT
 from os import kill, getpid, environ
 from .metadata import Metadata
 from observable import Observable
+from json import dumps
 
 # TODO:
 # docstring comments, see https://discord.com/channels/@me/557952164627087360/926697708222283846 for example
@@ -218,7 +219,8 @@ class Gateway:
         data = data if isinstance(data, list) else [data]
 
         # if the trade status is not in the data, use the last status
-        if "status" not in data:
+        print(dumps(data, indent=4, sort_keys=True), self.last_status)
+        if "status" in data:
             # if the last status is not None, use it
             if self.last_status is not None:
                 trade_status = self.last_status
