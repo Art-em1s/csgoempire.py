@@ -212,7 +212,7 @@ class Gateway:
         
         for item in data:
             self.events.trigger("on_trade_status", item)
-        
+            print(item)
             #trigger specific event based on trade status
             if "status" not in item['data'] and self.last_status is None:
                 return
