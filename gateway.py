@@ -66,7 +66,6 @@ class Gateway:
         """
         options = {"price_max": 999999, "price_max_above": 999, "delivery_time_long_max": 9999, "auction": "yes"}
         self.send('filters', options, namespace='/trade')
-        print("Filters emitted")
         
     def on(self, event, handler):
         self.events.on(event, handler)
