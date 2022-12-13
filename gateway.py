@@ -205,22 +205,20 @@ class Gateway:
         10: "credited"
         }
         data = data if isinstance(data, list) else [data]
-            
-            
-        if 'status' in item['data']:
-            self.last_status = data[0]['data']['status']
-        
-        for item in data:
-            self.events.trigger("on_trade_status", item)
-            print(item)
-            #trigger specific event based on trade status
-            if "status" not in item['data'] and self.last_status is None:
-                return
-            elif "status" not in item['data'] and self.last_status is not None:
+
+        # if the trade status is not in the data, use the last status
+        if "status" not in data:
+            # if the last status is not None, use it
+            if self.last_status is not None:
                 trade_status = self.last_status
             else:
-                trade_status = item['data']['status']
-                
+                # if the last status is None, skip processing this event until we have a status to fall back onto
+                return
+        else:
+            trade_status = data[-1]['data']['status'] # get the last status
+            
+        for item in data:
+            self.events.trigger("on_trade_status", item)
             self.events.trigger(f"on_trade_{trade_status_enum[trade_status]}", item)
     
         
