@@ -22,6 +22,7 @@ class Gateway:
         self.metadata = Metadata()
         self.debug_logger = logger
         self.debug_engineio_logger = engineio_logger
+        self.last_status = None
                         
     def kill_connection(self):
         """ Kill the WS connection via SIGINT
@@ -204,12 +205,22 @@ class Gateway:
         10: "credited"
         }
         data = data if isinstance(data, list) else [data]
+        if 'status' in item['data']:
+            self.last_status = item['data']['status']
+            
+            
         
         for item in data:
             self.events.trigger("on_trade_status", item)
         
             #trigger specific event based on trade status
-            trade_status = item['data']['status']
+            if "status" not in item['data'] and self.last_status is None:
+                return
+            elif "status" not in item['data'] and self.last_status is not None:
+                trade_status = self.last_status
+            else:
+                trade_status = item['data']['status']
+                
             self.events.trigger(f"on_trade_{trade_status_enum[trade_status]}", item)
     
         
