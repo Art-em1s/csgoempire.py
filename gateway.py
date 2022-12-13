@@ -205,10 +205,10 @@ class Gateway:
         10: "credited"
         }
         data = data if isinstance(data, list) else [data]
+            
+            
         if 'status' in item['data']:
-            self.last_status = item['data']['status']
-            
-            
+            self.last_status = data[0]['data']['status']
         
         for item in data:
             self.events.trigger("on_trade_status", item)
