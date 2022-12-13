@@ -219,7 +219,7 @@ class Gateway:
         data = data if isinstance(data, list) else [data]
 
         # if the trade status is not in the data, use the last status
-        print(dumps(data, indent=4, sort_keys=True), self.last_status)
+        # print(dumps(data, indent=4, sort_keys=True), self.last_status)
         if "status" in data:
             # if the last status is not None, use it
             if self.last_status is not None:
