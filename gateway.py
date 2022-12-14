@@ -245,9 +245,6 @@ class Gateway:
             self.last_status = trade_status
         else:
             if self.last_status is not None:
-                print(
-                    f"reusing status: {self.last_status} - {trade_status_enum[self.last_status]} for {data}"
-                )
                 trade_status = self.last_status
             else:
                 # if the last status is None, skip processing this event until we have a status to fall back onto
