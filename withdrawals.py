@@ -30,9 +30,9 @@ class Withdrawals(dict):
             if status == 401:
                 raise InvalidApiKey()
             elif status == 429:
-                raise ExceedsRatelimit(f"Withdrawal:Bid: {response['message']}")
+                raise ExceedsRatelimit(f"Withdrawal:Bid:{status}: {response['message']}")
             else:
-                raise RequestError(f"Withdrawal:Bid: {response['message']}")
+                raise RequestError(f"Withdrawal:Bid:{status}: {response['message']}")
 
     def get_items(self, per_page: int = 2500, page: int = 1, search: str = "", order: str = "market_value", sort="desc", auction: str = "yes", price_min: int = 1, price_max: int = 100000, price_max_above: int = 15):
         if search == "":
@@ -52,9 +52,9 @@ class Withdrawals(dict):
             if status == 401:
                 raise InvalidApiKey()
             elif status == 429:
-                raise ExceedsRatelimit(f"Withdrawal:Get_items: {response['message']}")
+                raise ExceedsRatelimit(f"Withdrawal:Get_items:{status}: {response['message']}")
             else:
-                raise RequestError(f"Withdrawal:Get_items: {response['message']}")
+                raise RequestError(f"Withdrawal:Get_items:{status}: {response['message']}")
         for i in range(2, response['last_page']+1):
             if search == "":
                 url = self.api_base_url+f"trading/items?per_page={per_page}&page={i}&order={order}&sort={sort}&auction={auction}&price_min={price_min}&price_max={price_max}&price_max_above={price_max_above}"
@@ -72,9 +72,9 @@ class Withdrawals(dict):
                 if status == 401:
                     raise InvalidApiKey()
                 elif status == 429:
-                    raise ExceedsRatelimit(f"Withdrawal:Get_items: {response['message']}")
+                    raise ExceedsRatelimit(f"Withdrawal:Get_items:{status}: {response['message']}")
                 else:
-                    raise RequestError(f"Withdrawal:Get_items: {response['message']}")
+                    raise RequestError(f"Withdrawal:Get_items:{status}: {response['message']}")
             delta = int(time())-start
             if delta < ratelimit_delay:  # If the request takes less than 3 seconds, sleep for 3 seconds - otherwise, the ratelimit will be exceeded
                 sleep(ratelimit_delay-delta)

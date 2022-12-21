@@ -39,9 +39,9 @@ class Metadata():
             if status == 401:
                 raise InvalidApiKey()
             elif status == 429:
-                raise ExceedsRatelimit(f"Meta:set_meta: {response['message']}")
+                raise ExceedsRatelimit(f"Meta:set_meta:{status}: {response['message']}")
             else:
-                raise RequestError(f"Meta:set_meta: {response['message']}")
+                raise RequestError(f"Meta:set_meta:{status}: {response['message']}")
         
     def get_metadata(self):
         if self.metadata is None or time() - self.last_update > self.metadata_update_period:

@@ -34,9 +34,9 @@ class Deposits(dict):
             if status == 401:
                 raise InvalidApiKey()
             elif status == 429:
-                raise ExceedsRatelimit(f"Deposits:get_active_deposits: {response['message']}")
+                raise ExceedsRatelimit(f"Deposits:get_active_deposits:{status}: {response['message']}")
             else:
-                raise RequestError(f"Deposits:get_active_deposits: {response['message']}")
+                raise RequestError(f"Deposits:get_active_deposits:{status}: {response['message']}")
             
     def get_inventory(self, force_refresh=False):
         
@@ -63,6 +63,6 @@ class Deposits(dict):
             if status == 401:
                 raise InvalidApiKey()
             elif status == 429:
-                raise ExceedsRatelimit(f"Deposits:Get_inv: {response['message']}")
+                raise ExceedsRatelimit(f"Deposits:Get_inv:{status}: {response['message']}")
             else:
-                raise RequestError(f"Deposits:Get_inv: {response['message']}")
+                raise RequestError(f"Deposits:Get_inv:{status}: {response['message']}")
