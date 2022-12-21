@@ -16,7 +16,7 @@ class Deposit(dict):
         return self[attr]
         
     def cancel(self):
-        url = self.api_base_url+"trading/deposits/{}/cancel".format(self.id)
+        url = f"{self.api_base_url}trading/deposits/{self.id}/cancel"
         response = requests.post(url, headers=self.headers)
         
         status = response.status_code
@@ -28,12 +28,12 @@ class Deposit(dict):
             if status == 401:
                 raise InvalidApiKey()
             elif status == 429:
-                raise ExceedsRatelimit(f"Deposit:Cancel: {response['message']}")
+                raise ExceedsRatelimit(f"Deposit:Cancel:{status}: {response['message']}")
             else:
-                raise RequestError(f"Deposit:Cancel: {response['message']}")
+                raise RequestError(f"Deposit:Cancel:{status}: {response['message']}")
         
     def sell_now(self):
-        url = self.api_base_url+"trading/deposits/{}/sell".format(self.id)
+        url = f"{self.api_base_url}trading/deposits/{self.id}/sell"
         response = requests.post(url, headers=self.headers)
         
         status = response.status_code
@@ -44,7 +44,7 @@ class Deposit(dict):
         elif response['invalid_api_token']:
             raise InvalidApiKey()
         else:
-            raise RequestError(f"Deposit:SellNow: {response}")
+            raise RequestError(f"Deposit:SellNow:{status}: {response}")
         
     def list_item(self, percentage):
         url = self.api_base_url+"trading/deposit"
@@ -61,7 +61,7 @@ class Deposit(dict):
             if status == 401:
                 raise InvalidApiKey()
             elif status == 429:
-                raise ExceedsRatelimit(f"Deposit:List_item: {response['message']}")
+                raise ExceedsRatelimit(f"Deposit:List_item:{status}: {response['message']}")
             else:
-                raise RequestError(f"Deposit:List_item: {response['message']}")
+                raise RequestError(f"Deposit:List_item:{status}: {response['message']}")
     
