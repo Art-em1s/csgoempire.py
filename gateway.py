@@ -241,7 +241,7 @@ class Gateway:
         # print(dumps(data, indent=4, sort_keys=True), self.last_status)
 
         for item in data:
-            if "status" in str(data):
+            if "status" in item['data'].keys():
                 trade_status = item["data"]["status"]  # get the last status
                 # if the last status is not None, use it
                 self.last_status = trade_status
