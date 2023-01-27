@@ -86,3 +86,8 @@ class Metadata():
         if self.metadata is None or time() - self.last_update > self.metadata_update_period:
             self.set_metadata()
         return self.user.balance
+    
+    def get_steam_api_key(self):
+        if self.metadata is None or time() - self.last_update > self.metadata_update_period:
+            self.set_metadata()
+        return self.user.steam_api_key
