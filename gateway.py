@@ -132,7 +132,8 @@ class Gateway:
         """Built in function for handling disconnection triggers reconnection if not manually disconnected"""
         self.is_connected = False
         self.is_authed = False
-        self.events.trigger("on_disconnected", True)
+        if self.events is not None:
+            self.events.trigger("on_disconnected", True)
         if self.has_disconnected is False:
             self.events = None
             # if the user has not initiated the dc themselves
