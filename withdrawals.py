@@ -45,8 +45,8 @@ class Withdrawals(dict):
         
         response = requests.get(url, headers=self.headers)
         status = response.status_code
-        response = response.json()
         if status == 200:
+            response = response.json()
             app(response['data'])
         else:
             if status == 401:
@@ -65,8 +65,8 @@ class Withdrawals(dict):
             start = int(time())
             response = requests.get(url, headers=self.headers)
             status = response.status_code
-            response = response.json()
             if status == 200:
+                response = response.json()
                 app(response['data'])
             else:
                 if status == 401:
