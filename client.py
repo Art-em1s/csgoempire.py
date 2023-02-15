@@ -23,8 +23,23 @@ class Client():
         self.api_key = token
         
         #todo: compare domain list against list from metadata
-        if domain.lower() not in ["https://csgoempire.com", "https://csgoempire.gg"]:
-            raise Exception("InvalidDomain", "Domain must be either https://csgoempire.com or https://csgoempire.gg")
+        if domain.lower() not in [
+            "csgoempire.com",
+            "csgoempire.gg",
+            "csgoempire.tv",
+            "csgoempiretr.com",
+            "csgoempire88.com",
+            "csgoempire.cam",
+            "csgoempirev2.com",
+            "csgoempire.io",
+            "csgoempire.info",
+            "csgoempire.vip",
+            "csgoempire.fun",
+            "csgoempire.biz",
+            "csgoempire.vegas",
+            "csgoempire.link"
+        ]:
+            raise Exception("InvalidDomain", "Invalid domain provided. Please use a valid domain from https://csgoempiremirror.com/")
         
         self.domain = domain
         self.api_base_url = f"{domain}/api/v2/"
