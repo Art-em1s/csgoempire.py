@@ -5,7 +5,7 @@ monkey.patch_all()
 
 from threading import Thread
 from os import environ as env
-
+from requests import get
 from .metadata import Metadata
 from .gateway import Gateway
 from .deposits import Deposits
@@ -22,23 +22,28 @@ class Client():
         
         self.api_key = token
         
-        #todo: compare domain list against list from metadata
-        if domain.lower() not in [
-            "csgoempire.com",
-            "csgoempire.gg",
-            "csgoempire.tv",
-            "csgoempiretr.com",
-            "csgoempire88.com",
-            "csgoempire.cam",
-            "csgoempirev2.com",
-            "csgoempire.io",
-            "csgoempire.info",
-            "csgoempire.vip",
-            "csgoempire.fun",
-            "csgoempire.biz",
-            "csgoempire.vegas",
-            "csgoempire.link"
-        ]:
+        # get domains from https://csgoempire.com/api/v2/metadata
+        accepted_domains = [
+            "https://csgoempire.com",
+            "https://csgoempire.gg",
+            "https://csgoempire.tv",
+            "https://csgoempiretr.com",
+            "https://csgoempire88.com",
+            "https://csgoempire.cam",
+            "https://csgoempirev2.com",
+            "https://csgoempire.io",
+            "https://csgoempire.info",
+            "https://csgoempire.vip",
+            "https://csgoempire.fun",
+            "https://csgoempire.biz",
+            "https://csgoempire.vegas",
+            "https://csgoempire.link"
+        ]
+        
+        if "https://" not in domain.lower():
+            domain = f"https://{domain}"
+                
+        if domain.lower() not in accepted_domains:
             raise Exception("InvalidDomain", "Invalid domain provided. Please use a valid domain from https://csgoempiremirror.com/")
         
         self.domain = domain
