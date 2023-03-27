@@ -40,8 +40,6 @@ class Gateway:
                 logger=self.debug_logger,
                 engineio_logger=self.debug_engineio_logger,
                 reconnection=True,
-                ping_interval=15,        # Set the ping interval to 15 seconds
-                ping_timeout=20          # Set the ping timeout to 20 seconds
             )
 
             # allow for .gg or .com
