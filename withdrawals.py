@@ -5,7 +5,53 @@ from time import sleep, time
 
 
 class Withdrawals(dict):
+    """
+    A class representing a collection of Withdrawals with methods to interact with the trading API. Inherits from a dictionary.
+
+    Attributes:
+        api_key (str): The API key used for authorization.
+        api_base_url (str): The base URL for the trading API.
+        headers (dict): Headers for making API requests with the API key.
+
+    Methods:
+        bid(item_id: int, amount: int) -> bool:
+            Place a bid on a listed item.
+            Parameters:
+                item_id (int): The ID of the item to bid on.
+                amount (int): The bid amount.
+            Returns:
+                True if the bid is successful, otherwise raises an error.
+
+        get_items(per_page: int = 2500, page: int = 1, search: str = "", order: str = "market_value", 
+                  sort="desc", auction: str = "yes", price_min: int = 1, price_max: int = 100000,
+                  price_max_above: int = 15) -> list:
+            Get a list of listed items with the specified filters.
+            Parameters:
+                per_page (int): Number of items per page.
+                page (int): The page number to fetch.
+                search (str): A search string to filter items by.
+                order (str): The ordering criteria for items.
+                sort (str): The sorting order (asc or desc).
+                auction (str): Whether or not to include auction items.
+                price_min (int): Minimum price for items.
+                price_max (int): Maximum price for items.
+                price_max_above (int): Maximum price above the market value.
+            Returns:
+                A list of items matching the specified filters.
+    """
     def __init__(self, api_key, api_base_url, *args, **kwargs):
+        """
+        Initializes a new instance of the Withdrawals class.
+
+        Parameters:
+        - api_key (str): The API key used for authentication.
+        - api_base_url (str): The base URL for API requests.
+        - *args: Variable-length argument list.
+        - **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+        - None
+        """
         super(Withdrawals, self).__init__(*args, **kwargs)
         self.__dict__ = self
         self.api_key = api_key
@@ -16,6 +62,16 @@ class Withdrawals(dict):
         return self[attr]
 
     def bid(self, item_id: int, amount: int):
+        """
+        Place a bid on a listed item.
+
+        Parameters:
+        - item_id (int): The ID of the item to bid on.
+        - amount (int): The bid amount.
+
+        Returns:
+        - True if the bid is successful, otherwise raises an error.
+        """
         url = f"{self.api_base_url}trading/deposit/{item_id}/bid"
         data = {"bid_value": amount}
         response = requests.post(url, headers=self.headers, data=json.dumps(data))
@@ -29,8 +85,23 @@ class Withdrawals(dict):
             handle_error(status, response, "Withdrawal", "bid")
 
     def get_items(self, per_page: int = 2500, page: int = 1, search: str = "", order: str = "market_value", sort="desc", auction: str = "yes", price_min: int = 1, price_max: int = 100000, price_max_above: int = 15):
-        """Get a list of listed items with the specified filters."""
+        """
+        Get a list of listed items with the specified filters.
 
+        Parameters:
+        - per_page (int): Number of items per page.
+        - page (int): The page number to fetch.
+        - search (str): A search string to filter items by.
+        - order (str): The ordering criteria for items.
+        - sort (str): The sorting order (asc or desc).
+        - auction (str): Whether or not to include auction items.
+        - price_min (int): Minimum price for items.
+        - price_max (int): Maximum price for items.
+        - price_max_above (int): Maximum price above the market value.
+
+        Returns:
+        - A list of items matching the specified filters.
+        """
         items = []
         base_params = {
             "per_page": per_page,
