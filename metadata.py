@@ -21,7 +21,7 @@ class Metadata():
 
         # set metadata on initalisation
         self.set_metadata()
-    
+
     # return metadata as a string
     def __repr__(self):
         return str(self._metadata)
@@ -85,4 +85,3 @@ class Metadata():
     def steam_api_key(self):
         self.ensure_metadata_updated()
         return self._user.steam_api_key
-    

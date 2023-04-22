@@ -9,18 +9,18 @@ class Withdrawals(dict):
         self.api_key = api_key
         self.api_base_url = api_base_url
         self.headers = {'Authorization': f'Bearer {self.api_key}', 'Content-Type': 'application/json'}
-    
+
     def __getattr__(self, attr):
         return self[attr]
-    
+
     def bid(self, item_id: int, amount: int):
         url = f"{self.api_base_url}trading/deposit/{item_id}/bid"
         data = {"bid_value": amount}
         response = requests.post(url, headers=self.headers, data=json.dumps(data))
-        
+
         status = response.status_code
         response = response.json()
-                
+
         if status == 200:
             return True
         else:
@@ -75,6 +75,6 @@ class Withdrawals(dict):
 
         return items
 
-            
+
 
 
