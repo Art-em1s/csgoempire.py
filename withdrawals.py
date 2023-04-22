@@ -26,7 +26,7 @@ class Withdrawals(dict):
         if status == 200:
             return True
         else:
-            handle_error(status, response)
+            handle_error(status, response, "bid")
 
 
     def get_items(self, per_page: int = 2500, page: int = 1, search: str = "", order: str = "market_value", sort="desc", auction: str = "yes", price_min: int = 1, price_max: int = 100000, price_max_above: int = 15):
@@ -69,7 +69,7 @@ class Withdrawals(dict):
                 items.extend(response['data'])
             else:
                 response = response.json()
-                self.handle_error(status, response)
+                self.handle_error(status, response, "get_items")
 
             delta = int(time()) - start
             if delta < ratelimit_delay:
@@ -79,10 +79,10 @@ class Withdrawals(dict):
 
             
 
-def handle_error(status, response):
+def handle_error(status, response, function_name):
     exception_mapping = {
         401: InvalidApiKey,
         429: ExceedsRatelimit
     }
     exception_class = exception_mapping.get(status, RequestError)
-    raise exception_class(f"Withdrawal:Get_items:{status}: {response['message']}")
+    raise exception_class(f"Withdrawal:{function_name}:{status}: {response['message']}")
