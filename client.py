@@ -1,10 +1,11 @@
+from gevent import monkey
+monkey.patch_all()
+
 from ._types import *
 from .withdrawals import Withdrawals
 from .deposits import Deposits
 from .gateway import Gateway
 from .metadata import Metadata
-from gevent import monkey
-monkey.patch_all()
 
 
 class Client():

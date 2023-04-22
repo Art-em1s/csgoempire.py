@@ -1,6 +1,3 @@
-
-from calendar import c
-from urllib import response
 import requests
 from ._types import Deposit, handle_error
 
