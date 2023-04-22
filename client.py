@@ -1,11 +1,6 @@
-#socketio prevents ctrl+c on windows, gevent fixes this for some reason
-# TODO: investigate this and fix (if possible)
 from gevent import monkey
 monkey.patch_all()
 
-from threading import Thread
-from os import environ as env
-from requests import get
 from .metadata import Metadata
 from .gateway import Gateway
 from .deposits import Deposits
@@ -13,63 +8,58 @@ from .withdrawals import Withdrawals
 from ._types import *
 
 class Client():
+    accepted_domains = [
+        "https://csgoempire.com",
+        "https://csgoempire.gg",
+        "https://csgoempire.tv",
+        "https://csgoempiretr.com",
+        "https://csgoempire88.com",
+        "https://csgoempire.cam",
+        "https://csgoempirev2.com",
+        "https://csgoempire.io",
+        "https://csgoempire.info",
+        "https://csgoempire.vip",
+        "https://csgoempire.fun",
+        "https://csgoempire.biz",
+        "https://csgoempire.vegas",
+        "https://csgoempire.link"
+    ]
+
+
     def __init__(self, token=None, domain="https://csgoempire.com", socket_enabled=True, socket_logger_enabled=False, engineio_logger_enabled=False):
-        
         if token is None:
             raise ApiKeyMissing()
         elif len(token) != 32:
             raise InvalidApiKey()
-        
+
         self.api_key = token
-        
-        # get domains from https://csgoempire.com/api/v2/metadata
-        accepted_domains = [
-            "https://csgoempire.com",
-            "https://csgoempire.gg",
-            "https://csgoempire.tv",
-            "https://csgoempiretr.com",
-            "https://csgoempire88.com",
-            "https://csgoempire.cam",
-            "https://csgoempirev2.com",
-            "https://csgoempire.io",
-            "https://csgoempire.info",
-            "https://csgoempire.vip",
-            "https://csgoempire.fun",
-            "https://csgoempire.biz",
-            "https://csgoempire.vegas",
-            "https://csgoempire.link"
-        ]
-        
-        if "https://" not in domain.lower():
-            domain = f"https://{domain}"
-                
-        if domain.lower() not in accepted_domains:
-            raise Exception("InvalidDomain", "Invalid domain provided. Please use a valid domain from https://csgoempiremirror.com/")
-        
-        self.domain = domain
-        self.api_base_url = f"{domain}/api/v2/"
-        self.headers = {'Authorization': f'Bearer {self.api_key}','Content-Type': 'application/json'}
-        
-        #todo: improve this
-        env['api_key'] = self.api_key
-        env['api_base_url'] = self.api_base_url
-        env['domain'] = self.domain
-        
+        self.domain = self.normalize_domain(domain)
+        self.api_base_url = f"{self.domain}/api/v2/"
+        self.headers = {'Authorization': f'Bearer {self.api_key}', 'Content-Type': 'application/json'}
+
         # setup metadata
-        self.metadata = Metadata()
+        self.metadata = Metadata(self.api_key, self.api_base_url)
         self.user = self.metadata.get_user()
-        
-        #validate api key using set metadata
+
+        # validate api key using set metadata
         self.validate_api_key()
 
-        #if validated, setup deposits/withdrawals
-        self.deposits = Deposits()
-        self.withdrawals = Withdrawals()
-        
-        #if client initalised with socket enabled, setup gateway
+        # if validated, setup deposits/withdrawals
+        self.deposits = Deposits(self.api_key, self.api_base_url)
+        self.withdrawals = Withdrawals(self.api_key, self.api_base_url)
+
+        # if client initialized with socket enabled, setup gateway
         if socket_enabled:
-            #setup socket in background
-            self.initalise_socket(logger=socket_logger_enabled, engineio_logger=engineio_logger_enabled)
+            # setup socket in background
+            self.initalise_socket(logger=socket_logger_enabled, engineio_logger=engineio_logger_enabled, domain=self.domain)
+            
+    @staticmethod
+    def normalize_domain(domain):
+        if "https://" not in domain.lower():
+            domain = f"https://{domain}"
+        if domain.lower() not in Client.accepted_domains:
+            raise InvalidDomain("Invalid domain provided. Please use a valid domain from https://csgoempiremirror.com/")
+        return domain
             
 
     #metadata related functions

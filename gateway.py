@@ -4,6 +4,8 @@ from os import kill, getpid, environ
 from .metadata import Metadata
 from observable import Observable
 from json import dumps
+import threading
+from urllib.parse import urlparse
 
 # TODO:
 # docstring comments, see https://discord.com/channels/@me/557952164627087360/926697708222283846 for example
@@ -11,7 +13,7 @@ from json import dumps
 
 class Gateway:
     # logger
-    def __init__(self, logger=False, engineio_logger=False):
+    def __init__(self, logger=False, engineio_logger=False, domain="csgoempire.com"):
         self.is_connected = False  # is the socket connected
         self.is_authed = False  # is the user authenticated
         self.has_disconnected = False  # triggered when manually disconnected, used to detect if manual dc, denotes reconnect behaviour
@@ -26,6 +28,8 @@ class Gateway:
         self.debug_logger = logger
         self.debug_engineio_logger = engineio_logger
         self.last_status = None
+        self.domain = urlparse(domain).netloc #remove protocol from domain
+        
 
     def kill_connection(self):
         """Kill the WS connection via SIGINT"""
@@ -42,11 +46,9 @@ class Gateway:
                 reconnection=True,
             )
 
-            # allow for .gg or .com
-            domain = environ["domain"].split("/")[-1]
             try:
                 self.socket = self.sio.connect(
-                    url=f"wss://trade.{domain}",
+                    url=f"wss://trade.{self.domain}",
                     socketio_path="/s/",
                     headers={"User-agent": user_agent},
                     transports=["websocket"],

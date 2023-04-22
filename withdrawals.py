@@ -1,15 +1,13 @@
 import requests, json
 from ._types import handle_error
-
-from os import environ as env
 from time import sleep, time
 
 class Withdrawals(dict):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, api_key, api_base_url, *args, **kwargs):
         super(Withdrawals, self).__init__(*args, **kwargs)
         self.__dict__ = self
-        self.api_key = env['api_key']
-        self.api_base_url = env['api_base_url']
+        self.api_key = api_key
+        self.api_base_url = api_base_url
         self.headers = {'Authorization': f'Bearer {self.api_key}','Content-Type': 'application/json'}
     
     def __getattr__(self, attr):

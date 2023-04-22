@@ -1,22 +1,21 @@
 from ._types import Meta, InvalidApiKey, User, RequestError, ExceedsRatelimit
 import requests
 
-from os import environ as env
 from time import time
 
 
 class Metadata():
     metadata_update_period = 60*60*6  # 6 hours
 
-    def __init__(self):
+    def __init__(self, api_key, api_base_url):
+        self.api_key = api_key
+        self.api_base_url = api_base_url
         # self.is_multiuser = False  # todo implement multiuser for account linking
         # self.users: list = None  # list of users
         self.user: User = None  # instance of user
         self.metadata = None
         self.socket_token = None
         self.socket_signature = None
-        self.api_key = env['api_key']
-        self.api_base_url = env['api_base_url']
         self.headers = {'Authorization': f'Bearer {self.api_key}', 'Content-Type': 'application/json'}
         self.last_update = None
 

@@ -2,16 +2,16 @@
 from calendar import c
 from urllib import response
 import requests
-from ._types import InvalidApiKey, RequestError, ExceedsRatelimit
+from ._types import handle_error
 from ._types import Deposit
 from os import environ as env
 
 
 class Deposits(dict):
 
-    def __init__(self):
-        self.api_key = env['api_key']
-        self.api_base_url = env['api_base_url']
+    def __init__(self, api_key, api_base_url):
+        self.api_key = api_key
+        self.api_base_url = api_base_url
         self.headers = {'Authorization': f'Bearer {self.api_key}','Content-Type': 'application/json'}
         self.deposit = Deposit()
         self.can_refresh = False
@@ -31,12 +31,7 @@ class Deposits(dict):
                 app(Deposit(item))
             return active_deposits
         else:
-            if status == 401:
-                raise InvalidApiKey()
-            elif status == 429:
-                raise ExceedsRatelimit(f"Deposits:get_active_deposits:{status}: {response['message']}")
-            else:
-                raise RequestError(f"Deposits:get_active_deposits:{status}: {response['message']}")
+            handle_error(status, response, "Deposits", "get_active_deposits")
             
     def get_inventory(self, force_refresh=False):
         
@@ -60,9 +55,4 @@ class Deposits(dict):
                 app(Deposit(item))
             return inventory
         else:
-            if status == 401:
-                raise InvalidApiKey()
-            elif status == 429:
-                raise ExceedsRatelimit(f"Deposits:Get_inv:{status}: {response['message']}")
-            else:
-                raise RequestError(f"Deposits:Get_inv:{status}: {response['message']}")
+            handle_error(status, response, "Deposits", "get_inventory")
