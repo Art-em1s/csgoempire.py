@@ -13,7 +13,9 @@ from urllib.parse import urlparse
 
 class Gateway:
     # logger
-    def __init__(self, logger=False, engineio_logger=False, domain="csgoempire.com"):
+    def __init__(self, api_key, api_base_url, logger=False, engineio_logger=False, domain="csgoempire.com"):
+        self.api_key = api_key
+        self.api_base_url = api_base_url
         self.is_connected = False  # is the socket connected
         self.is_authed = False  # is the user authenticated
         self.has_disconnected = False  # triggered when manually disconnected, used to detect if manual dc, denotes reconnect behaviour
@@ -24,7 +26,7 @@ class Gateway:
         self.auth = None
         self.sio = None
         self.events = None
-        self.metadata = Metadata()
+        self.metadata = Metadata(self.api_key, self.api_base_url)
         self.debug_logger = logger
         self.debug_engineio_logger = engineio_logger
         self.last_status = None
@@ -37,7 +39,7 @@ class Gateway:
         kill(getpid(), SIGINT)
 
     def setup(self):
-        user_agent = f"{self.metadata.get_user_id()} API Bot | Python Library"
+        user_agent = f"{self.metadata.user_id} API Bot | Python Library"
         self.events = Observable()
         if self.is_connected is False and self.socket is None:
             self.sio = socketio.Client(
