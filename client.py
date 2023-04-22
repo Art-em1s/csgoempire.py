@@ -97,7 +97,7 @@ class Client():
         return self.metadata.user
 
     def get_steam_api_key(self):
-        return self.metadata.steam_api_key
+        return self.metadata.user.steam_api_key
 
     # deposit related functions
 
