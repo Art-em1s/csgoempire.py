@@ -47,7 +47,7 @@ class Deposits(dict):
         if status == 200:
             self.can_refresh = response['allowUpdate']
             for item in response['data']:
-                if "invalid" in item or item['market_value'] < 0 or item['tradable'] == False:
+                if "invalid" in item or item['market_value'] < 0 or item['tradable'] is False:
                     continue
                 app(Deposit(item))
             return inventory
