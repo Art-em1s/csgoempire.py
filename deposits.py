@@ -9,7 +9,7 @@ class Deposits(dict):
     def __init__(self, api_key, api_base_url):
         self.api_key = api_key
         self.api_base_url = api_base_url
-        self.headers = {'Authorization': f'Bearer {self.api_key}','Content-Type': 'application/json'}
+        self.headers = {'Authorization': f'Bearer {self.api_key}', 'Content-Type': 'application/json'}
         self.deposit = Deposit(api_key, api_base_url)
         self.can_refresh = False
         
