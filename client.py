@@ -110,8 +110,7 @@ class Client():
         if filter:
             inventory = self.deposits.get_inventory(force_refresh)
             return [item for item in inventory if item['tradable'] is True and item['market_value'] > 0]
-        else:
-            return self.deposits.get_inventory(force_refresh)
+        return self.deposits.get_inventory(force_refresh)
 
     #withdrawal related functions
 
