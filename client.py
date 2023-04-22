@@ -39,7 +39,7 @@ class Client():
 
         # setup metadata
         self.metadata = Metadata(self.api_key, self.api_base_url)
-        self.user = self.metadata.get_user()
+        self.user = self.metadata.user
 
         # validate api key using set metadata
         self.validate_api_key()
@@ -65,16 +65,16 @@ class Client():
     #metadata related functions
         
     def get_metadata(self):
-        return self.metadata.get_metadata()
+        return self.metadata
 
     def get_balance(self):
-        return self.metadata.get_balance()
+        return self.metadata.balance
         
     def get_socket_token(self):
-        return self.metadata.get_socket_token()
+        return self.metadata.socket_token
     
     def get_socket_signature(self):
-        return self.metadata.get_socket_signature()
+        return self.metadata.socket_signature
     
     def get_api_token(self):
         return self.api_key
@@ -86,19 +86,19 @@ class Client():
         return self.headers
     
     def validate_api_key(self):
-        if self.get_metadata()['user'] is None:
+        if self.metadata.user is None:
             raise InvalidApiKey()
         
     # user related functions
         
     def get_user_id(self):
-        return self.metadata.get_user_id()
+        return self.metadata.user_id
     
     def get_user(self):
-        return self.metadata.get_user()
+        return self.metadata.user
     
     def get_steam_api_key(self):
-        return self.metadata.get_steam_api_key()
+        return self.metadata.steam_api_key
     
         
     #deposit related functions
@@ -125,8 +125,8 @@ class Client():
     def disconnect(self):
         self.gateway.disconnect()
         
-    def initalise_socket(self, logger=False, engineio_logger=False):
-        self.gateway = Gateway(logger, engineio_logger)
+    def initalise_socket(self, logger=False, engineio_logger=False, domain=None):
+        self.gateway = Gateway(self.api_key, self.api_base_url, logger, engineio_logger, domain)
         self.socket = self.gateway.setup()
         self.events = self.gateway.get_events()
                 
