@@ -58,7 +58,7 @@ class Deposits(dict):
 
         if status == 200:
             for item in response['data']['deposits']:
-                app(Deposit(item))
+                app(Deposit(self.api_key, self.api_base_url, item))
             return active_deposits
         else:
             handle_error(status, response, "Deposits", "get_active_deposits")
@@ -93,7 +93,7 @@ class Deposits(dict):
                 # skip any invalid items or items that are not tradable
                 if "invalid" in item or item['market_value'] < 0 or item['tradable'] is False:
                     continue
-                app(Deposit(item))
+                app(Deposit(self.api_key, self.api_base_url, item))
             return inventory
         else:
             handle_error(status, response, "Deposits", "get_inventory")
