@@ -1,5 +1,5 @@
 import requests, json
-from ._types import InvalidApiKey, RequestError, ExceedsRatelimit
+from ._types import handle_error
 
 from os import environ as env
 from time import sleep, time
@@ -26,7 +26,7 @@ class Withdrawals(dict):
         if status == 200:
             return True
         else:
-            handle_error(status, response, "bid")
+            handle_error(status, response, "Withdrawal", "bid")
 
 
     def get_items(self, per_page: int = 2500, page: int = 1, search: str = "", order: str = "market_value", sort="desc", auction: str = "yes", price_min: int = 1, price_max: int = 100000, price_max_above: int = 15):
@@ -55,7 +55,7 @@ class Withdrawals(dict):
             total_pages = response['last_page']
         else:
             response = response.json()
-            self.handle_error(status, response)
+            handle_error(status, response, "Withdrawal", "get_items")
 
         for i in range(page + 1, total_pages + 1):
             ratelimit_delay = 3.1 if search else 3.4
@@ -69,7 +69,7 @@ class Withdrawals(dict):
                 items.extend(response['data'])
             else:
                 response = response.json()
-                self.handle_error(status, response, "get_items")
+                handle_error(status, response, "Withdrawal", "bid")
 
             delta = int(time()) - start
             if delta < ratelimit_delay:
@@ -79,10 +79,4 @@ class Withdrawals(dict):
 
             
 
-def handle_error(status, response, function_name):
-    exception_mapping = {
-        401: InvalidApiKey,
-        429: ExceedsRatelimit
-    }
-    exception_class = exception_mapping.get(status, RequestError)
-    raise exception_class(f"Withdrawal:{function_name}:{status}: {response['message']}")
+
