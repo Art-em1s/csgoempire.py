@@ -1,11 +1,11 @@
+from ._types import *
+from .withdrawals import Withdrawals
+from .deposits import Deposits
+from .gateway import Gateway
+from .metadata import Metadata
 from gevent import monkey
 monkey.patch_all()
 
-from .metadata import Metadata
-from .gateway import Gateway
-from .deposits import Deposits
-from .withdrawals import Withdrawals
-from ._types import *
 
 class Client():
     accepted_domains = [
@@ -24,7 +24,6 @@ class Client():
         "https://csgoempire.vegas",
         "https://csgoempire.link"
     ]
-
 
     def __init__(self, token=None, domain="https://csgoempire.com", socket_enabled=True, socket_logger_enabled=False, engineio_logger_enabled=False):
         if token is None:
@@ -61,8 +60,7 @@ class Client():
             raise InvalidDomain("Invalid domain provided. Please use a valid domain from https://csgoempiremirror.com/")
         return domain
 
-
-    #metadata related functions
+    # metadata related functions
 
     def get_metadata(self):
         return self.metadata
@@ -100,26 +98,25 @@ class Client():
     def get_steam_api_key(self):
         return self.metadata.steam_api_key
 
-
-    #deposit related functions
+    # deposit related functions
 
     def get_active_deposits(self):
         return self.deposits.get_active_deposits()
 
-    def get_inventory(self, filter: bool = True, force_refresh = False):
+    def get_inventory(self, filter: bool = True, force_refresh=False):
         if filter:
             inventory = self.deposits.get_inventory(force_refresh)
             return [item for item in inventory if item['tradable'] is True and item['market_value'] > 0]
         return self.deposits.get_inventory(force_refresh)
 
-    #withdrawal related functions
+    # withdrawal related functions
 
     def get_auctions(self, **kwargs):
         return self.withdrawals.get_items(**kwargs)
 
     get_withdrawals = get_auctions
 
-    #gateway related functions
+    # gateway related functions
 
     def disconnect(self):
         self.gateway.disconnect()

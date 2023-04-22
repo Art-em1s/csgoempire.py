@@ -1,6 +1,8 @@
-import requests, json
+import requests
+import json
 from ._types import handle_error
 from time import sleep, time
+
 
 class Withdrawals(dict):
     def __init__(self, api_key, api_base_url, *args, **kwargs):
@@ -25,7 +27,6 @@ class Withdrawals(dict):
             return True
         else:
             handle_error(status, response, "Withdrawal", "bid")
-
 
     def get_items(self, per_page: int = 2500, page: int = 1, search: str = "", order: str = "market_value", sort="desc", auction: str = "yes", price_min: int = 1, price_max: int = 100000, price_max_above: int = 15):
         """Get a list of listed items with the specified filters."""
@@ -74,7 +75,3 @@ class Withdrawals(dict):
                 sleep(ratelimit_delay - delta)
 
         return items
-
-
-
-
