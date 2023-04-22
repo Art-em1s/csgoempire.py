@@ -29,7 +29,7 @@ class Client():
     def __init__(self, token=None, domain="https://csgoempire.com", socket_enabled=True, socket_logger_enabled=False, engineio_logger_enabled=False):
         if token is None:
             raise ApiKeyMissing()
-        elif len(token) != 32:
+        if len(token) != 32:
             raise InvalidApiKey()
 
         self.api_key = token
