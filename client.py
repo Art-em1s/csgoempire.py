@@ -52,7 +52,7 @@ class Client():
         if socket_enabled:
             # setup socket in background
             self.initalise_socket(logger=socket_logger_enabled, engineio_logger=engineio_logger_enabled, domain=self.domain)
-            
+
     @staticmethod
     def normalize_domain(domain):
         if "https://" not in domain.lower():
@@ -60,79 +60,79 @@ class Client():
         if domain.lower() not in Client.accepted_domains:
             raise InvalidDomain("Invalid domain provided. Please use a valid domain from https://csgoempiremirror.com/")
         return domain
-            
+
 
     #metadata related functions
-        
+
     def get_metadata(self):
         return self.metadata
 
     def get_balance(self):
         return self.metadata.balance
-        
+
     def get_socket_token(self):
         return self.metadata.socket_token
-    
+
     def get_socket_signature(self):
         return self.metadata.socket_signature
-    
+
     def get_api_token(self):
         return self.api_key
-    
+
     def get_domain(self):
         return self.domain
-    
+
     def get_auth_headers(self):
         return self.headers
-    
+
     def validate_api_key(self):
         if self.metadata.user is None:
             raise InvalidApiKey()
-        
+
     # user related functions
-        
+
     def get_user_id(self):
         return self.metadata.user_id
-    
+
     def get_user(self):
         return self.metadata.user
-    
+
     def get_steam_api_key(self):
         return self.metadata.steam_api_key
-    
-        
+
+
     #deposit related functions
-    
+
     def get_active_deposits(self):
         return self.deposits.get_active_deposits()
-    
+
     def get_inventory(self, filter: bool = True, force_refresh = False):
         if filter:
             inventory = self.deposits.get_inventory(force_refresh)
             return [item for item in inventory if item['tradable'] is True and item['market_value'] > 0]
         else:
             return self.deposits.get_inventory(force_refresh)
-        
+
     #withdrawal related functions
-    
+
     def get_auctions(self, **kwargs):
         return self.withdrawals.get_items(**kwargs)
-    
+
     get_withdrawals = get_auctions
-    
+
     #gateway related functions
-    
+
     def disconnect(self):
         self.gateway.disconnect()
-        
+
     def initalise_socket(self, logger=False, engineio_logger=False, domain=None):
         self.gateway = Gateway(self.api_key, self.api_base_url, logger, engineio_logger, domain)
         self.socket = self.gateway.setup()
         self.events = self.gateway.get_events()
-                
+
     def kill_connection(self):
         self.gateway.kill_connection()
-        
+
     def reconnect(self):
         self.gateway.dc()
         self.gateway = None
