@@ -1,82 +1,77 @@
-import re
-import requests, json
-from ._types import InvalidApiKey, RequestError, ExceedsRatelimit
-
-from os import environ as env
+import requests
+import json
+from ._types import handle_error
 from time import sleep, time
 
+
 class Withdrawals(dict):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, api_key, api_base_url, *args, **kwargs):
         super(Withdrawals, self).__init__(*args, **kwargs)
         self.__dict__ = self
-        self.api_key = env['api_key']
-        self.api_base_url = env['api_base_url']
-        self.headers = {'Authorization': f'Bearer {self.api_key}','Content-Type': 'application/json'}
-    
+        self.api_key = api_key
+        self.api_base_url = api_base_url
+        self.headers = {'Authorization': f'Bearer {self.api_key}', 'Content-Type': 'application/json'}
+
     def __getattr__(self, attr):
         return self[attr]
-    
+
     def bid(self, item_id: int, amount: int):
-        url = self.api_base_url+f"trading/deposit/{item_id}/bid"
-        data = {"bid_value":amount}
-        response = requests.post(url, headers=self.headers, data=json.loads(data))
-        
+        url = f"{self.api_base_url}trading/deposit/{item_id}/bid"
+        data = {"bid_value": amount}
+        response = requests.post(url, headers=self.headers, data=json.dumps(data))
+
         status = response.status_code
         response = response.json()
-                
+
         if status == 200:
             return True
         else:
-            if status == 401:
-                raise InvalidApiKey()
-            elif status == 429:
-                raise ExceedsRatelimit(f"Withdrawal:Bid:{status}: {response['message']}")
-            else:
-                raise RequestError(f"Withdrawal:Bid:{status}: {response['message']}")
+            handle_error(status, response, "Withdrawal", "bid")
 
     def get_items(self, per_page: int = 2500, page: int = 1, search: str = "", order: str = "market_value", sort="desc", auction: str = "yes", price_min: int = 1, price_max: int = 100000, price_max_above: int = 15):
-        if search == "":
-            url = self.api_base_url+f"trading/items?per_page={per_page}&page={page}&order={order}&sort={sort}&auction={auction}&price_min={price_min}&price_max={price_max}&price_max_above={price_max_above}"
-        else:
-            url = self.api_base_url+f"trading/items?per_page={per_page}&page={page}&search={search}&order={order}&sort={sort}&auction={auction}&price_min={price_min}&price_max={price_max}&price_max_above={price_max_above}"
-            
+        """Get a list of listed items with the specified filters."""
+
         items = []
-        app = items.extend
-        
-        response = requests.get(url, headers=self.headers)
+        base_params = {
+            "per_page": per_page,
+            "order": order,
+            "sort": sort,
+            "auction": auction,
+            "price_min": price_min,
+            "price_max": price_max,
+            "price_max_above": price_max_above
+        }
+
+        if search:
+            base_params["search"] = search
+
+        response = requests.get(f"{self.api_base_url}trading/items", headers=self.headers, params={**base_params, "page": page})
         status = response.status_code
+
         if status == 200:
             response = response.json()
-            app(response['data'])
+            items.extend(response['data'])
+            total_pages = response['last_page']
         else:
-            if status == 401:
-                raise InvalidApiKey()
-            elif status == 429:
-                raise ExceedsRatelimit(f"Withdrawal:Get_items:{status}: {response['message']}")
-            else:
-                raise RequestError(f"Withdrawal:Get_items:{status}: {response['message']}")
-        for i in range(2, response['last_page']+1):
-            if search == "":
-                url = self.api_base_url+f"trading/items?per_page={per_page}&page={i}&order={order}&sort={sort}&auction={auction}&price_min={price_min}&price_max={price_max}&price_max_above={price_max_above}"
-                ratelimit_delay = 3.4
-            else:
-                url = self.api_base_url+f"trading/items?per_page={per_page}&page={i}&search={search}&order={order}&sort={sort}&auction={auction}&price_min={price_min}&price_max={price_max}&price_max_above={price_max_above}"
-                ratelimit_delay = 3.1
+            response = response.json()
+            handle_error(status, response, "Withdrawal", "get_items")
+
+        for i in range(page + 1, total_pages + 1):
+            ratelimit_delay = 3.1 if search else 3.4
+
             start = int(time())
-            response = requests.get(url, headers=self.headers)
+            response = requests.get(f"{self.api_base_url}trading/items", headers=self.headers, params={**base_params, "page": i})
             status = response.status_code
+
             if status == 200:
                 response = response.json()
-                app(response['data'])
+                items.extend(response['data'])
             else:
-                if status == 401:
-                    raise InvalidApiKey()
-                elif status == 429:
-                    raise ExceedsRatelimit(f"Withdrawal:Get_items:{status}: {response['message']}")
-                else:
-                    raise RequestError(f"Withdrawal:Get_items:{status}: {response['message']}")
-            delta = int(time())-start
-            if delta < ratelimit_delay:  # If the request takes less than 3 seconds, sleep for 3 seconds - otherwise, the ratelimit will be exceeded
-                sleep(ratelimit_delay-delta)
+                response = response.json()
+                handle_error(status, response, "Withdrawal", "bid")
+
+            delta = int(time()) - start
+            if delta < ratelimit_delay:
+                sleep(ratelimit_delay - delta)
+
         return items
-            

@@ -4,6 +4,8 @@ from os import kill, getpid, environ
 from .metadata import Metadata
 from observable import Observable
 from json import dumps
+import threading
+from urllib.parse import urlparse
 
 # TODO:
 # docstring comments, see https://discord.com/channels/@me/557952164627087360/926697708222283846 for example
@@ -11,7 +13,9 @@ from json import dumps
 
 class Gateway:
     # logger
-    def __init__(self, logger=False, engineio_logger=False):
+    def __init__(self, api_key, api_base_url, logger=False, engineio_logger=False, domain="csgoempire.com"):
+        self.api_key = api_key
+        self.api_base_url = api_base_url
         self.is_connected = False  # is the socket connected
         self.is_authed = False  # is the user authenticated
         self.has_disconnected = False  # triggered when manually disconnected, used to detect if manual dc, denotes reconnect behaviour
@@ -22,10 +26,12 @@ class Gateway:
         self.auth = None
         self.sio = None
         self.events = None
-        self.metadata = Metadata()
+        self.metadata = Metadata(self.api_key, self.api_base_url)
         self.debug_logger = logger
         self.debug_engineio_logger = engineio_logger
         self.last_status = None
+        self.domain = urlparse(domain).netloc #remove protocol from domain
+
 
     def kill_connection(self):
         """Kill the WS connection via SIGINT"""
@@ -33,7 +39,7 @@ class Gateway:
         kill(getpid(), SIGINT)
 
     def setup(self):
-        user_agent = f"{self.metadata.get_user_id()} API Bot | Python Library"
+        user_agent = f"{self.metadata.user_id} API Bot | Python Library"
         self.events = Observable()
         if self.is_connected is False and self.socket is None:
             self.sio = socketio.Client(
@@ -42,11 +48,9 @@ class Gateway:
                 reconnection=True,
             )
 
-            # allow for .gg or .com
-            domain = environ["domain"].split("/")[-1]
             try:
                 self.socket = self.sio.connect(
-                    url=f"wss://trade.{domain}",
+                    url=f"wss://trade.{self.domain}",
                     socketio_path="/s/",
                     headers={"User-agent": user_agent},
                     transports=["websocket"],
@@ -128,16 +132,21 @@ class Gateway:
         else:
             self.events.trigger("on_connected", True)
 
-    def disconnected(self):
-        """Built in function for handling disconnection triggers reconnection if not manually disconnected"""
+
+    def disconnected(self, data=None):
+        """Built-in function for handling disconnection triggers reconnection if not manually disconnected."""
         self.is_connected = False
         self.is_authed = False
+
         if self.events is not None:
-            self.events.trigger("on_disconnected", True)
-        if self.has_disconnected is False:
+            # Trigger 'on_disconnected' event with either the provided data or True if no data is available
+            self.events.trigger("on_disconnected", data if data is not None else True)
+
+        if not self.has_disconnected:
+            # If the user has not initiated the disconnection themselves
             self.events = None
-            # if the user has not initiated the dc themselves
             self.is_reconnecting = True
+
 
     def connect_error(self, data):
         """Map the connect_error event to the on_error event
