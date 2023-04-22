@@ -238,7 +238,8 @@ class Gateway:
 
         Parameters:
         - data (dict): Data related to the updated item event.
-        """ [data]
+        """
+        data = data if isinstance(data, list) else [data]
         for item in data:
             self.events.trigger("on_updated_item", item)
 
