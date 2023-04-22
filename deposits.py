@@ -2,10 +2,7 @@
 from calendar import c
 from urllib import response
 import requests
-from ._types import handle_error
-from ._types import Deposit
-from os import environ as env
-
+from ._types import Deposit, handle_error
 
 class Deposits(dict):
 
@@ -13,7 +10,7 @@ class Deposits(dict):
         self.api_key = api_key
         self.api_base_url = api_base_url
         self.headers = {'Authorization': f'Bearer {self.api_key}','Content-Type': 'application/json'}
-        self.deposit = Deposit()
+        self.deposit = Deposit(api_key, api_base_url)
         self.can_refresh = False
         
     def get_active_deposits(self):
