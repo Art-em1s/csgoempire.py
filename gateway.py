@@ -31,7 +31,7 @@ class Gateway:
         self.debug_engineio_logger = engineio_logger
         self.last_status = None
         self.domain = urlparse(domain).netloc #remove protocol from domain
-        
+
 
     def kill_connection(self):
         """Kill the WS connection via SIGINT"""
