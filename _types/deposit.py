@@ -4,11 +4,11 @@ from os import environ as env
 from json import dumps
 
 class Deposit(dict):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, api_key, api_base_url, *args, **kwargs):
         super(Deposit, self).__init__(*args, **kwargs)
         self.__dict__ = self
-        self.api_key = env['api_key']
-        self.api_base_url = env['api_base_url']
+        self.api_key = api_key
+        self.api_base_url = api_base_url
         self.headers = {'Authorization': f'Bearer {self.api_key}','Content-Type': 'application/json'}
         
     
