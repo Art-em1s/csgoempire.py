@@ -63,15 +63,16 @@ class Gateway:
             )
 
             try:
-                self.socket = self.sio.connect(
-                    url=f"wss://trade.{self.domain}",
-                    socketio_path="/s/",
-                    headers={"User-agent": user_agent},
-                    transports=["websocket"],
-                    namespaces=["/trade"],
-                )
+                options = {
+                    "url": f"wss://trade.{self.domain}",
+                    "socketio_path": "/s/",
+                    "headers": {"User-agent": user_agent},
+                    "transports": ["websocket"],
+                    "namespaces": ["/trade"],
+                }
+                self.socket = self.sio.connect(**options)
             except Exception as e:
-                print(f"WS Connection error: {e}")
+                print(f"WS Connection error: {e} | {options}")
 
         self.sio.on("connect", handler=self.connected)
         self.sio.on("disconnect", handler=self.disconnected)
