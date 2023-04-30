@@ -1,3 +1,5 @@
+import sys
+
 class CustomError(Exception):
     def __init__(self, message):
         self.message = message
@@ -7,11 +9,13 @@ class CustomError(Exception):
 
 
 class ApiKeyMissing(CustomError):
+    sys.tracebacklimit = 0
     def __init__(self):
         super().__init__("No token provided, please generate a token at https://csgoempire.com/trading/apikey")
 
 
 class InvalidApiKey(CustomError):
+    sys.tracebacklimit = 0
     def __init__(self):
         super().__init__("Invalid token provided, please generate a token at https://csgoempire.com/trading/apikey")
 
@@ -21,10 +25,12 @@ class RequestError(CustomError):
 
 
 class InvalidDomain(CustomError):
+    sys.tracebacklimit = 0
     pass
 
 
 class ExceedsRatelimit(CustomError):
+    sys.tracebacklimit = 0
     pass
 
 
