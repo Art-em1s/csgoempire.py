@@ -57,8 +57,13 @@ class Client():
     def normalize_domain(domain):
         if "https://" not in domain.lower():
             domain = f"https://{domain}"
+        
+        if domain[-1] == "/":
+            domain = domain[:-1]
+        
         if domain.lower() not in Client.accepted_domains:
-            raise InvalidDomain("Invalid domain provided. Please use a valid domain from https://csgoempiremirror.com/")
+            accepted_domains_hr = ',\n'.join(Client.accepted_domains)
+            raise InvalidDomain(f"Invalid domain provided\n\nDomain provided:\n{domain}\n\nAccepted domains:\n{accepted_domains_hr}\n\nPlease change your domain to one of these accepted domains.\n")
         return domain
 
     # metadata related functions
