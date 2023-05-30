@@ -31,7 +31,7 @@ class Client():
             raise ApiKeyMissing()
         if len(token) != 32:
             raise InvalidApiKey()
-        
+
         self.socket_enabled = socket_enabled
         self.socket_logger_enabled = socket_logger_enabled
         self.engineio_logger_enabled = engineio_logger_enabled

@@ -46,7 +46,7 @@ class Gateway:
         else:
             self.domain = domain
         self.custom_websocket_url = custom_ws_url
-        
+
     def kill_connection(self):
         """
         Method that force kills the WebSocket connection by sending a SIGINT signal.
