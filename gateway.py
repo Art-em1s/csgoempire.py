@@ -10,7 +10,7 @@ from urllib.parse import urlparse
 
 class Gateway:
     # logger
-    def __init__(self, api_key, api_base_url, logger=False, engineio_logger=False, domain="csgoempire.com"):
+    def __init__(self, api_key, api_base_url, logger=False, engineio_logger=False, domain="csgoempire.com", custom_ws_url=False):
         """
         Constructor method for Gateway class.
 
@@ -39,8 +39,13 @@ class Gateway:
         self.debug_logger = logger
         self.debug_engineio_logger = engineio_logger
         self.last_status = None
-        # remove protocol from domain
-        self.domain = urlparse(domain).netloc
+        # remove protocol from domain if exists
+        parsed_url = urlparse(domain)
+        if parsed_url.scheme:
+            self.domain = parsed_url.netloc
+        else:
+            self.domain = domain
+        self.custom_websocket_url = custom_ws_url
 
     def kill_connection(self):
         """
@@ -64,7 +69,7 @@ class Gateway:
 
             try:
                 options = {
-                    "url": f"wss://trade.{self.domain}",
+                    "url": f"wss://trade.{self.domain}" if self.custom_websocket_url is False else f"wss://{self.domain}",
                     "socketio_path": "/s/",
                     "headers": {"User-agent": user_agent},
                     "transports": ["websocket"],
@@ -72,7 +77,7 @@ class Gateway:
                 }
                 self.socket = self.sio.connect(**options)
             except Exception as e:
-                print(f"WS Connection error: {e} | {options}")
+                print(f"WS Connection error (gateway): {e} | {options}")
 
         self.sio.on("connect", handler=self.connected)
         self.sio.on("disconnect", handler=self.disconnected)

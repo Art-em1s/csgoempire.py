@@ -26,11 +26,16 @@ class Client():
         "https://csgoempire.link"
     ]
 
-    def __init__(self, token=None, domain="https://csgoempire.com", socket_enabled=True, socket_logger_enabled=False, engineio_logger_enabled=False):
+    def __init__(self, token=None, domain="https://csgoempire.com", ws_url=None, socket_enabled=True, socket_logger_enabled=False, engineio_logger_enabled=False):
         if token is None:
             raise ApiKeyMissing()
         if len(token) != 32:
             raise InvalidApiKey()
+
+        self.socket_enabled = socket_enabled
+        self.socket_logger_enabled = socket_logger_enabled
+        self.engineio_logger_enabled = engineio_logger_enabled
+        self.ws_url = ws_url
 
         self.api_key = token
         self.domain = self.normalize_domain(domain)
@@ -51,7 +56,7 @@ class Client():
         # if client initialized with socket enabled, setup gateway
         if socket_enabled:
             # setup socket in background
-            self.initalise_socket(logger=socket_logger_enabled, engineio_logger=engineio_logger_enabled, domain=self.domain)
+            self.initalise_socket(logger=socket_logger_enabled, engineio_logger=engineio_logger_enabled)
 
     @staticmethod
     def normalize_domain(domain):
@@ -127,8 +132,11 @@ class Client():
     def disconnect(self):
         self.gateway.disconnect()
 
-    def initalise_socket(self, logger=False, engineio_logger=False, domain=None):
-        self.gateway = Gateway(self.api_key, self.api_base_url, logger, engineio_logger, domain)
+    def initalise_socket(self, logger=False, engineio_logger=False):
+        # use ws_url if exists, otherwise use domain
+        websocket_url = self.ws_url if self.ws_url is not None else self.domain
+        # setup gateway
+        self.gateway = Gateway(self.api_key, self.api_base_url, logger, engineio_logger, domain=websocket_url, custom_ws_url=self.ws_url is not None)
         self.socket = self.gateway.setup()
         self.events = self.gateway.get_events()
 
@@ -140,4 +148,4 @@ class Client():
         self.gateway = None
         self.socket = None
         self.events = None
-        self.initalise_socket()
+        self.initalise_socket(logger=self.socket_logger_enabled, engineio_logger=self.engineio_logger_enabled)
